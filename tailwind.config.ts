@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -25,8 +26,45 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#0066CC',
+					50: '#E6F2FF',
+					100: '#CCE5FF',
+					200: '#99CCFF',
+					300: '#66B2FF',
+					400: '#3399FF',
+					500: '#0066CC',
+					600: '#0052A3',
+					700: '#003D7A',
+					800: '#002952',
+					900: '#001429',
+					foreground: '#FFFFFF'
+				},
+				accent: {
+					DEFAULT: '#FFB703',
+					50: '#FFF8E1',
+					100: '#FFECB3',
+					200: '#FFE082',
+					300: '#FFD54F',
+					400: '#FFCA28',
+					500: '#FFB703',
+					600: '#FFA000',
+					700: '#FF8F00',
+					800: '#FF6F00',
+					900: '#E65100',
+					foreground: '#202225'
+				},
+				neutral: {
+					DEFAULT: '#F4F6F8',
+					50: '#FAFBFC',
+					100: '#F4F6F8',
+					200: '#E4E6EA',
+					300: '#D4D6DA',
+					400: '#9AA0A6',
+					500: '#5F6368',
+					600: '#3C4043',
+					700: '#202225',
+					800: '#171717',
+					900: '#0D0D0D',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -39,10 +77,6 @@ export default {
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
 					foreground: 'hsl(var(--muted-foreground))'
-				},
-				accent: {
-					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -64,9 +98,13 @@ export default {
 				}
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				lg: '8px',
+				md: '6px',
+				sm: '4px'
+			},
+			fontFamily: {
+				heading: ['"M PLUS 1p"', 'sans-serif'],
+				body: ['"Noto Sans JP"', 'sans-serif'],
 			},
 			keyframes: {
 				'accordion-down': {
@@ -84,11 +122,22 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 150ms ease-out'
 			}
 		}
 	},
