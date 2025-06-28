@@ -33,9 +33,10 @@ const recentCases = [
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const isCollapsed = state === "collapsed";
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -55,9 +56,9 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
+    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarHeader className="border-b p-4">
-        {!collapsed && (
+        {!isCollapsed && (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">F</span>
@@ -81,7 +82,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavCls}>
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!isCollapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -90,7 +91,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {!collapsed && (
+        {!isCollapsed && (
           <SidebarGroup>
             <SidebarGroupLabel>最近の案件</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -116,7 +117,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t p-4">
         <div className="flex items-center justify-between">
-          {!collapsed && (
+          {!isCollapsed && (
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-accent-foreground" />
