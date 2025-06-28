@@ -6,82 +6,82 @@
 @layer base {
   :root {
     --background: 255 255 255;
-    --foreground: 32 34 37;
+    --foreground: 17 24 39;
 
     --card: 255 255 255;
-    --card-foreground: 32 34 37;
+    --card-foreground: 17 24 39;
 
     --popover: 255 255 255;
-    --popover-foreground: 32 34 37;
+    --popover-foreground: 17 24 39;
 
-    --primary: 0 102 204;
+    --primary: 37 99 235;
     --primary-foreground: 255 255 255;
 
-    --secondary: 244 246 248;
-    --secondary-foreground: 32 34 37;
+    --secondary: 249 250 251;
+    --secondary-foreground: 17 24 39;
 
-    --muted: 244 246 248;
-    --muted-foreground: 95 99 104;
+    --muted: 249 250 251;
+    --muted-foreground: 107 114 128;
 
-    --accent: 255 183 3;
-    --accent-foreground: 32 34 37;
+    --accent: 245 158 11;
+    --accent-foreground: 17 24 39;
 
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
 
-    --border: 228 230 234;
-    --input: 228 230 234;
-    --ring: 0 102 204;
+    --border: 229 231 235;
+    --input: 229 231 235;
+    --ring: 37 99 235;
 
     --radius: 8px;
 
     --sidebar-background: 255 255 255;
-    --sidebar-foreground: 32 34 37;
-    --sidebar-primary: 0 102 204;
+    --sidebar-foreground: 17 24 39;
+    --sidebar-primary: 37 99 235;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 244 246 248;
-    --sidebar-accent-foreground: 32 34 37;
-    --sidebar-border: 228 230 234;
-    --sidebar-ring: 0 102 204;
+    --sidebar-accent: 249 250 251;
+    --sidebar-accent-foreground: 17 24 39;
+    --sidebar-border: 229 231 235;
+    --sidebar-ring: 37 99 235;
   }
 
   .dark {
-    --background: 13 13 13;
-    --foreground: 250 251 252;
+    --background: 17 24 39;
+    --foreground: 249 250 251;
 
-    --card: 23 23 23;
-    --card-foreground: 250 251 252;
+    --card: 31 41 55;
+    --card-foreground: 249 250 251;
 
-    --popover: 23 23 23;
-    --popover-foreground: 250 251 252;
+    --popover: 31 41 55;
+    --popover-foreground: 249 250 251;
 
-    --primary: 51 153 255;
-    --primary-foreground: 13 13 13;
+    --primary: 96 165 250;
+    --primary-foreground: 17 24 39;
 
-    --secondary: 32 34 37;
-    --secondary-foreground: 250 251 252;
+    --secondary: 75 85 99;
+    --secondary-foreground: 249 250 251;
 
-    --muted: 32 34 37;
-    --muted-foreground: 154 160 166;
+    --muted: 75 85 99;
+    --muted-foreground: 156 163 175;
 
-    --accent: 255 183 3;
-    --accent-foreground: 13 13 13;
+    --accent: 251 191 36;
+    --accent-foreground: 17 24 39;
 
     --destructive: 220 38 38;
-    --destructive-foreground: 250 251 252;
+    --destructive-foreground: 249 250 251;
 
-    --border: 60 64 67;
-    --input: 60 64 67;
-    --ring: 51 153 255;
+    --border: 75 85 99;
+    --input: 75 85 99;
+    --ring: 96 165 250;
 
-    --sidebar-background: 23 23 23;
-    --sidebar-foreground: 250 251 252;
-    --sidebar-primary: 51 153 255;
-    --sidebar-primary-foreground: 13 13 13;
-    --sidebar-accent: 32 34 37;
-    --sidebar-accent-foreground: 250 251 252;
-    --sidebar-border: 60 64 67;
-    --sidebar-ring: 51 153 255;
+    --sidebar-background: 31 41 55;
+    --sidebar-foreground: 249 250 251;
+    --sidebar-primary: 96 165 250;
+    --sidebar-primary-foreground: 17 24 39;
+    --sidebar-accent: 75 85 99;
+    --sidebar-accent-foreground: 249 250 251;
+    --sidebar-border: 75 85 99;
+    --sidebar-ring: 96 165 250;
   }
 }
 
@@ -102,11 +102,11 @@
 
 @layer components {
   .gradient-primary {
-    background: linear-gradient(135deg, #0066CC 0%, #3399FF 100%);
+    background: linear-gradient(135deg, #EBF5FF 0%, #F9FAFB 100%);
   }
   
   .gradient-accent {
-    background: linear-gradient(135deg, #FFB703 0%, #FFA000 100%);
+    background: linear-gradient(135deg, #FEF3C7 0%, #F9FAFB 100%);
   }
 
   .focus-visible {
