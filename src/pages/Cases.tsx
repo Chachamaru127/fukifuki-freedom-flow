@@ -1,65 +1,71 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Filter, Phone, Edit, Trash2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  Phone, 
+  Edit, 
+  Trash2,
+  Building2,
+  Calendar,
+  User
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { toast } from "sonner";
 
+// Mock data - in real app, fetch from Supabase
 const mockCases = [
   {
     id: '1',
-    company: '株式会社サンプル',
+    company_name: '株式会社サンプル',
+    employee_name: '田中一郎',
     status: 'completed',
-    createdAt: '2024-01-15',
-    lastUpdate: '2024-01-20',
-    notes: '円満退職完了',
+    created_at: '2024-01-15',
+    last_contact: '2024-01-20',
   },
   {
-    id: '2', 
-    company: 'テスト商事株式会社',
+    id: '2',
+    company_name: 'テスト商事株式会社',
+    employee_name: '佐藤花子',
     status: 'in_progress',
-    createdAt: '2024-01-18',
-    lastUpdate: '2024-01-22',
-    notes: '書類待ち',
+    created_at: '2024-01-18',
+    last_contact: '2024-01-22',
   },
   {
     id: '3',
-    company: '例示会社Ltd.',
+    company_name: '例示会社Ltd.',
+    employee_name: '鈴木太郎',
     status: 'draft',
-    createdAt: '2024-01-20',
-    lastUpdate: '2024-01-20',
-    notes: '相談段階',
+    created_at: '2024-01-20',
+    last_contact: '2024-01-20',
   },
   {
     id: '4',
-    company: 'サンプル株式会社',
+    company_name: '株式会社デモ',
+    employee_name: '高橋美咲',
     status: 'submitted',
-    createdAt: '2024-01-21',
-    lastUpdate: '2024-01-23',
-    notes: '申請済み',
+    created_at: '2024-01-22',
+    last_contact: '2024-01-23',
   },
 ];
 
 export default function Cases() {
-  const [cases, setCases] = useState(mockCases);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newCase, setNewCase] = useState({
-    company: "",
-    notes: "",
-    status: "draft",
+    company_name: "",
+    employee_name: "",
   });
 
   const getStatusBadge = (status: string) => {
@@ -69,7 +75,7 @@ export default function Cases() {
       case 'in_progress':
         return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">進行中</Badge>;
       case 'submitted':
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">申請済み</Badge>;
+        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">提出済み</Badge>;
       case 'draft':
         return <Badge variant="secondary">下書き</Badge>;
       default:
@@ -77,111 +83,72 @@ export default function Cases() {
     }
   };
 
-  const filteredCases = cases.filter(case_ => {
-    const matchesSearch = case_.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         case_.notes.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredCases = mockCases.filter(case_ => {
+    const matchesSearch = case_.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         case_.employee_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || case_.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const handleCreateCase = () => {
-    if (!newCase.company.trim()) {
-      toast.error("会社名を入力してください");
-      return;
-    }
-
-    const caseData = {
-      id: String(cases.length + 1),
-      company: newCase.company,
-      status: newCase.status,
-      notes: newCase.notes,
-      createdAt: new Date().toISOString().split('T')[0],
-      lastUpdate: new Date().toISOString().split('T')[0],
-    };
-
-    setCases(prev => [caseData, ...prev]);
-    setNewCase({ company: "", notes: "", status: "draft" });
+    // In real app, create case in Supabase
+    console.log("Creating case:", newCase);
     setIsCreateModalOpen(false);
-    toast.success("案件を作成しました");
-  };
-
-  const handleDeleteCase = (id: string) => {
-    setCases(prev => prev.filter(case_ => case_.id !== id));
-    toast.success("案件を削除しました");
+    setNewCase({ company_name: "", employee_name: "" });
   };
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-neutral-50">
         <AppSidebar />
         
         <main className="flex-1 p-6 space-y-6">
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold font-heading">案件管理</h1>
-              <p className="text-muted-foreground">退職代行の案件を管理できます</p>
+              <h1 className="text-3xl font-bold font-heading text-neutral-900">案件管理</h1>
+              <p className="text-neutral-600">退職代行案件の管理と進捗確認</p>
             </div>
             
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-primary hover:bg-primary/90 text-white">
                   <Plus className="mr-2 h-4 w-4" />
                   新規案件作成
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[525px]">
+              <DialogContent className="bg-white">
                 <DialogHeader>
-                  <DialogTitle>新規案件作成</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-neutral-900">新規案件作成</DialogTitle>
+                  <DialogDescription className="text-neutral-600">
                     新しい退職代行案件を作成します
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="company">会社名</Label>
+                    <Label htmlFor="company" className="text-neutral-900">会社名</Label>
                     <Input
                       id="company"
-                      placeholder="例: 株式会社サンプル"
-                      value={newCase.company}
-                      onChange={(e) => setNewCase(prev => ({ ...prev, company: e.target.value }))}
+                      placeholder="株式会社○○"
+                      value={newCase.company_name}
+                      onChange={(e) => setNewCase({...newCase, company_name: e.target.value})}
+                      className="border-neutral-300 focus:border-primary focus:ring-primary"
                     />
                   </div>
-                  
                   <div className="space-y-2">
-                    <Label htmlFor="status">ステータス</Label>
-                    <Select 
-                      value={newCase.status} 
-                      onValueChange={(value) => setNewCase(prev => ({ ...prev, status: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">下書き</SelectItem>
-                        <SelectItem value="submitted">申請済み</SelectItem>
-                        <SelectItem value="in_progress">進行中</SelectItem>
-                        <SelectItem value="completed">完了</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">メモ</Label>
-                    <Textarea
-                      id="notes"
-                      placeholder="案件に関するメモを入力してください"
-                      value={newCase.notes}
-                      onChange={(e) => setNewCase(prev => ({ ...prev, notes: e.target.value }))}
-                      rows={3}
+                    <Label htmlFor="employee" className="text-neutral-900">従業員名</Label>
+                    <Input
+                      id="employee"
+                      placeholder="山田太郎"
+                      value={newCase.employee_name}
+                      onChange={(e) => setNewCase({...newCase, employee_name: e.target.value})}
+                      className="border-neutral-300 focus:border-primary focus:ring-primary"
                     />
                   </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
-                    キャンセル
-                  </Button>
-                  <Button onClick={handleCreateCase}>
+                  <Button 
+                    onClick={handleCreateCase} 
+                    className="w-full bg-primary hover:bg-primary/90 text-white"
+                  >
                     案件を作成
                   </Button>
                 </div>
@@ -190,33 +157,33 @@ export default function Cases() {
           </div>
 
           {/* Filters */}
-          <Card>
+          <Card className="bg-white border-neutral-200">
             <CardHeader>
-              <CardTitle className="text-lg">フィルター</CardTitle>
+              <CardTitle className="text-neutral-900">検索・フィルター</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-neutral-500" />
                     <Input
-                      placeholder="会社名やメモで検索..."
-                      className="pl-10"
+                      placeholder="会社名または従業員名で検索..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 border-neutral-300 focus:border-primary focus:ring-primary"
                     />
                   </div>
                 </div>
-                <div className="w-full md:w-48">
+                <div className="w-48">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-neutral-300 focus:border-primary focus:ring-primary">
                       <Filter className="mr-2 h-4 w-4" />
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="all">すべてのステータス</SelectItem>
                       <SelectItem value="draft">下書き</SelectItem>
-                      <SelectItem value="submitted">申請済み</SelectItem>
+                      <SelectItem value="submitted">提出済み</SelectItem>
                       <SelectItem value="in_progress">進行中</SelectItem>
                       <SelectItem value="completed">完了</SelectItem>
                     </SelectContent>
@@ -227,67 +194,69 @@ export default function Cases() {
           </Card>
 
           {/* Cases Table */}
-          <Card>
+          <Card className="bg-white border-neutral-200">
             <CardHeader>
-              <CardTitle>案件一覧</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-neutral-900">案件一覧</CardTitle>
+              <CardDescription className="text-neutral-600">
                 {filteredCases.length}件の案件が見つかりました
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>会社名</TableHead>
-                      <TableHead>ステータス</TableHead>
-                      <TableHead>作成日</TableHead>
-                      <TableHead>最終更新</TableHead>
-                      <TableHead>メモ</TableHead>
-                      <TableHead className="text-right">アクション</TableHead>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-neutral-900">会社名</TableHead>
+                    <TableHead className="text-neutral-900">従業員名</TableHead>
+                    <TableHead className="text-neutral-900">ステータス</TableHead>
+                    <TableHead className="text-neutral-900">作成日</TableHead>
+                    <TableHead className="text-neutral-900">最終連絡</TableHead>
+                    <TableHead className="text-neutral-900">アクション</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCases.map((case_) => (
+                    <TableRow key={case_.id} className="hover:bg-neutral-50">
+                      <TableCell className="font-medium text-neutral-900">
+                        <div className="flex items-center space-x-2">
+                          <Building2 className="h-4 w-4 text-neutral-500" />
+                          <span>{case_.company_name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-neutral-700">
+                        <div className="flex items-center space-x-2">
+                          <User className="h-4 w-4 text-neutral-500" />
+                          <span>{case_.employee_name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(case_.status)}
+                      </TableCell>
+                      <TableCell className="text-neutral-700">
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="h-4 w-4 text-neutral-500" />
+                          <span>{case_.created_at}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-neutral-700">{case_.last_contact}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Link to={`/call/${case_.id}`}>
+                            <Button variant="outline" size="sm" className="border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+                              <Phone className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button variant="outline" size="sm" className="border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" className="border-neutral-300 text-red-600 hover:bg-red-50">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCases.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                          案件が見つかりませんでした
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredCases.map((case_) => (
-                        <TableRow key={case_.id}>
-                          <TableCell className="font-medium">{case_.company}</TableCell>
-                          <TableCell>{getStatusBadge(case_.status)}</TableCell>
-                          <TableCell>{case_.createdAt}</TableCell>
-                          <TableCell>{case_.lastUpdate}</TableCell>
-                          <TableCell className="max-w-48 truncate">{case_.notes}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end space-x-1">
-                              <Link to={`/call/${case_.id}`}>
-                                <Button variant="ghost" size="sm">
-                                  <Phone className="h-4 w-4" />
-                                </Button>
-                              </Link>
-                              <Button variant="ghost" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleDeleteCase(case_.id)}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </main>
