@@ -5,10 +5,22 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
+
+// User-facing pages
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Cases from "./pages/Cases";
+import Signup from "./pages/Signup";
+import MyPage from "./pages/MyPage";
+import ConsultationNew from "./pages/ConsultationNew";
+import ConsultationDetail from "./pages/ConsultationDetail";
+
+// Admin pages
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminCases from "./pages/AdminCases";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminSettings from "./pages/AdminSettings";
+
+// Shared pages
 import Call from "./pages/Call";
 import NotFound from "./pages/NotFound";
 
@@ -22,12 +34,28 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* User-facing routes */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/cases" element={<Cases />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/consultation/new" element={<ConsultationNew />} />
+            <Route path="/consultation/:id" element={<ConsultationDetail />} />
+            
+            {/* Admin routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/cases" element={<AdminCases />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            
+            {/* Shared routes */}
             <Route path="/call/:id" element={<Call />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
+            {/* Legacy routes - redirect to admin */}
+            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/cases" element={<AdminCases />} />
+            
+            {/* 404 - should be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

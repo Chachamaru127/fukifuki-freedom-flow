@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -20,6 +19,28 @@ export default {
 		},
 		extend: {
 			colors: {
+				// User-facing colors (light theme)
+				user: {
+					primary: '#2563EB',
+					secondary: '#10B981',
+					accent: '#F59E0B',
+					background: '#FFFFFF',
+					'background-alt': '#F9FAFB',
+					text: '#111827',
+					'text-secondary': '#6B7280',
+				},
+				// Admin colors (dark theme)
+				admin: {
+					primary: '#6366F1',
+					secondary: '#8B5CF6',
+					accent: '#F59E0B',
+					background: '#111827',
+					'background-alt': '#1F2937',
+					surface: '#374151',
+					text: '#F9FAFB',
+					'text-secondary': '#D1D5DB',
+				},
+				// Existing shadcn colors
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
