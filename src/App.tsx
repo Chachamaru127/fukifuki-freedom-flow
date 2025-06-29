@@ -15,6 +15,7 @@ import ConsultationNew from "./pages/ConsultationNew";
 import ConsultationDetail from "./pages/ConsultationDetail";
 
 // Admin pages
+import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminCases from "./pages/AdminCases";
 import AdminAnalytics from "./pages/AdminAnalytics";
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/consultation/:id" element={<ConsultationDetail />} />
             
             {/* Admin routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/cases" element={<AdminCases />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />

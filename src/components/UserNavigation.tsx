@@ -15,7 +15,7 @@ export function UserNavigation() {
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 font-body">
+    <nav className="bg-user-background border-b border-neutral-200 font-body shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -65,7 +65,7 @@ export function UserNavigation() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+          <div className="md:hidden border-t border-neutral-200 py-4">
             <div className="space-y-2">
               {navItems.map((item) => (
                 <Link
