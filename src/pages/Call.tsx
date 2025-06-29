@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,13 +94,13 @@ export default function Call() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 font-body">
       {/* Header */}
       <div className="bg-white border-b border-neutral-200 p-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-4">
             <Link to="/cases">
-              <Button variant="outline" size="sm" className="border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+              <Button variant="outline" size="sm" className="border-neutral-300 text-neutral-700 hover:bg-neutral-50 rounded-lg">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 案件一覧に戻る
               </Button>
@@ -126,11 +125,11 @@ export default function Call() {
           {/* Video Call Section */}
           <div className="lg:col-span-2 space-y-6">
             {/* Case Info */}
-            <Card className="bg-white border-neutral-200">
+            <Card className="bg-white border-neutral-200 rounded-lg">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-neutral-900">
                   <span>案件情報</span>
-                  <Badge className="bg-blue-100 text-blue-800">進行中</Badge>
+                  <Badge className="bg-blue-100 text-blue-800 rounded-lg">進行中</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -154,7 +153,7 @@ export default function Call() {
             </Card>
 
             {/* Video Area */}
-            <Card className="bg-white border-neutral-200">
+            <Card className="bg-white border-neutral-200 rounded-lg">
               <CardContent className="p-0">
                 <div className="relative bg-neutral-900 rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
                   {/* Avatar/Video Placeholder */}
@@ -192,7 +191,7 @@ export default function Call() {
                     {!isCallActive ? (
                       <Button 
                         onClick={handleStartCall}
-                        className="bg-green-600 hover:bg-green-700 text-white px-8"
+                        className="bg-green-600 hover:bg-green-700 text-white px-8 rounded-lg"
                       >
                         <Phone className="h-4 w-4 mr-2" />
                         通話開始
@@ -202,7 +201,7 @@ export default function Call() {
                         <Button
                           variant="outline"
                           onClick={() => setIsMuted(!isMuted)}
-                          className={isMuted ? "bg-red-100 border-red-300 text-red-700" : "border-neutral-300 text-neutral-700 hover:bg-neutral-50"}
+                          className={isMuted ? "bg-red-100 border-red-300 text-red-700 rounded-lg" : "border-neutral-300 text-neutral-700 hover:bg-neutral-50 rounded-lg"}
                         >
                           {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                         </Button>
@@ -210,14 +209,14 @@ export default function Call() {
                         <Button
                           variant="outline"
                           onClick={() => setIsVideoOn(!isVideoOn)}
-                          className={!isVideoOn ? "bg-red-100 border-red-300 text-red-700" : "border-neutral-300 text-neutral-700 hover:bg-neutral-50"}
+                          className={!isVideoOn ? "bg-red-100 border-red-300 text-red-700 rounded-lg" : "border-neutral-300 text-neutral-700 hover:bg-neutral-50 rounded-lg"}
                         >
                           {isVideoOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
                         </Button>
                         
                         <Button 
                           onClick={handleEndCall}
-                          className="bg-red-600 hover:bg-red-700 text-white px-8"
+                          className="bg-red-600 hover:bg-red-700 text-white px-8 rounded-lg"
                         >
                           <PhoneOff className="h-4 w-4 mr-2" />
                           通話終了
@@ -232,14 +231,14 @@ export default function Call() {
 
           {/* Transcript Panel */}
           <div className="space-y-6">
-            <Card className="bg-white border-neutral-200">
+            <Card className="bg-white border-neutral-200 rounded-lg">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-neutral-900">
                   <span className="flex items-center space-x-2">
                     <MessageCircle className="h-5 w-5" />
                     <span>通話記録</span>
                   </span>
-                  <Button variant="outline" size="sm" className="border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+                  <Button variant="outline" size="sm" className="border-neutral-300 text-neutral-700 hover:bg-neutral-50 rounded-lg">
                     <Download className="h-4 w-4" />
                   </Button>
                 </CardTitle>
@@ -255,7 +254,7 @@ export default function Call() {
                         <div className="flex items-center space-x-2 mb-1">
                           <Badge 
                             variant={entry.speaker === 'Agent' ? 'default' : 'secondary'}
-                            className={entry.speaker === 'Agent' ? 'bg-primary text-white' : ''}
+                            className={entry.speaker === 'Agent' ? 'bg-primary text-white rounded-lg' : 'rounded-lg'}
                           >
                             {entry.speaker === 'Agent' ? 'エージェント' : '会社'}
                           </Badge>
@@ -270,21 +269,21 @@ export default function Call() {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="bg-white border-neutral-200">
+            <Card className="bg-white border-neutral-200 rounded-lg">
               <CardHeader>
                 <CardTitle className="text-neutral-900">クイックアクション</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+                <Button variant="outline" className="w-full justify-start border-neutral-300 text-neutral-700 hover:bg-blue-50 rounded-lg">
                   退職日の確認
                 </Button>
-                <Button variant="outline" className="w-full justify-start border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+                <Button variant="outline" className="w-full justify-start border-neutral-300 text-neutral-700 hover:bg-blue-50 rounded-lg">
                   書類の送付依頼
                 </Button>
-                <Button variant="outline" className="w-full justify-start border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+                <Button variant="outline" className="w-full justify-start border-neutral-300 text-neutral-700 hover:bg-blue-50 rounded-lg">
                   有給消化の相談
                 </Button>
-                <Button variant="outline" className="w-full justify-start border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+                <Button variant="outline" className="w-full justify-start border-neutral-300 text-neutral-700 hover:bg-blue-50 rounded-lg">
                   引き継ぎの確認
                 </Button>
               </CardContent>

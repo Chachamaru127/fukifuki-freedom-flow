@@ -40,7 +40,7 @@ const monthlyData = [
 
 const statusData = [
   { name: '完了', value: 85, color: '#10B981' },
-  { name: '進行中', value: 12, color: '#F59E0B' },
+  { name: '進行中', value: 12, color: '#2563EB' },
   { name: '下書き', value: 3, color: '#6B7280' },
 ];
 
@@ -96,13 +96,13 @@ export default function Dashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">完了</Badge>;
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-lg">完了</Badge>;
       case 'in_progress':
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">進行中</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-lg">進行中</Badge>;
       case 'draft':
-        return <Badge variant="secondary">下書き</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 rounded-lg">下書き</Badge>;
       default:
-        return <Badge variant="outline">不明</Badge>;
+        return <Badge variant="outline" className="rounded-lg">不明</Badge>;
     }
   };
 
@@ -111,7 +111,7 @@ export default function Dashboard() {
       case 'high':
         return 'text-red-600 dark:text-red-400';
       case 'medium':
-        return 'text-yellow-600 dark:text-yellow-400';
+        return 'text-blue-600 dark:text-blue-400';
       case 'low':
         return 'text-green-600 dark:text-green-400';
       default:
@@ -121,18 +121,18 @@ export default function Dashboard() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-neutral-50 font-body">
         <AppSidebar />
         
         <main className="flex-1 p-6 space-y-6">
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold font-heading">ダッシュボード</h1>
-              <p className="text-muted-foreground">案件の進捗と次のアクションを確認できます</p>
+              <h1 className="text-3xl font-bold font-heading text-neutral-900">ダッシュボード</h1>
+              <p className="text-neutral-600">案件の進捗と次のアクションを確認できます</p>
             </div>
             <Link to="/cases">
-              <Button>
+              <Button className="bg-primary hover:bg-primary/90 text-white rounded-lg">
                 <Plus className="mr-2 h-4 w-4" />
                 新規案件作成
               </Button>
@@ -141,14 +141,14 @@ export default function Dashboard() {
 
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
+            <Card className="bg-white rounded-lg border-neutral-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">総案件数</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-neutral-900">総案件数</CardTitle>
+                <FileText className="h-4 w-4 text-neutral-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">124</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-2xl font-bold text-neutral-900">124</div>
+                <p className="text-xs text-neutral-600">
                   <span className="text-green-600">+12%</span> 先月比
                 </p>
               </CardContent>
@@ -194,10 +194,10 @@ export default function Dashboard() {
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            <Card className="bg-white rounded-lg border-neutral-200">
               <CardHeader>
-                <CardTitle>月別案件推移</CardTitle>
-                <CardDescription>過去6ヶ月の案件数と完了数</CardDescription>
+                <CardTitle className="text-neutral-900">月別案件推移</CardTitle>
+                <CardDescription className="text-neutral-600">過去6ヶ月の案件数と完了数</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -206,7 +206,7 @@ export default function Dashboard() {
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="cases" fill="#0066CC" name="総案件数" />
+                    <Bar dataKey="cases" fill="#2563EB" name="総案件数" />
                     <Bar dataKey="completed" fill="#10B981" name="完了数" />
                   </BarChart>
                 </ResponsiveContainer>

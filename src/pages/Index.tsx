@@ -59,9 +59,9 @@ export default function Index() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background font-body">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-neutral-200">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="font-heading font-bold text-2xl text-primary">
             FUKIFUKI
@@ -82,7 +82,7 @@ export default function Index() {
             </a>
             <ThemeToggle />
             <Link to="/login">
-              <Button variant="outline">ログイン</Button>
+              <Button variant="outline" className="border-neutral-300 text-neutral-700 hover:bg-neutral-50">ログイン</Button>
             </Link>
           </nav>
 
@@ -100,7 +100,7 @@ export default function Index() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-background border-t">
+          <div className="md:hidden bg-white border-t border-neutral-200">
             <nav className="container mx-auto px-4 py-4 space-y-4">
               <a href="#features" className="block text-neutral-700 hover:text-primary transition-colors">
                 サービス
@@ -115,7 +115,7 @@ export default function Index() {
                 よくある質問
               </a>
               <Link to="/login" className="block">
-                <Button variant="outline" className="w-full">ログイン</Button>
+                <Button variant="outline" className="w-full border-neutral-300 text-neutral-700 hover:bg-neutral-50">ログイン</Button>
               </Link>
             </nav>
           </div>
@@ -123,7 +123,7 @@ export default function Index() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 lg:py-32 gradient-primary">
+      <section className="py-20 lg:py-32 bg-gradient-to-br from-blue-50 to-neutral-50">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
@@ -131,7 +131,7 @@ export default function Index() {
                 <Badge className="bg-primary/10 text-primary border-primary/20">
                   24時間365日対応
                 </Badge>
-                <h1 className="text-4xl lg:text-6xl font-bold leading-tight text-neutral-900">
+                <h1 className="text-4xl lg:text-6xl font-bold leading-tight text-neutral-900 font-heading">
                   退職の悩み、
                   <br />
                   <span className="text-primary">プロが解決</span>
@@ -147,7 +147,7 @@ export default function Index() {
                 <Link to="/login">
                   <Button 
                     size="lg" 
-                    className="bg-accent text-neutral-900 hover:bg-accent/90 text-lg px-8 py-4 h-auto"
+                    className="bg-accent text-neutral-900 hover:bg-accent/90 text-lg px-8 py-4 h-auto rounded-lg"
                   >
                     無料で相談する
                     <ChevronRight className="ml-2 h-5 w-5" />
@@ -156,7 +156,7 @@ export default function Index() {
                 <Button 
                   variant="outline" 
                   size="lg"
-                  className="border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-lg px-8 py-4 h-auto"
+                  className="border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-lg px-8 py-4 h-auto rounded-lg"
                 >
                   サービス詳細
                 </Button>
@@ -390,10 +390,10 @@ export default function Index() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 gradient-accent">
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-neutral-50">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
-            <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900">
+            <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900 font-heading">
               退職の悩み、一人で抱え込まないでください
             </h2>
             <p className="text-xl text-neutral-700 leading-relaxed">
@@ -405,7 +405,7 @@ export default function Index() {
               <Link to="/login">
                 <Button 
                   size="lg" 
-                  className="bg-accent text-neutral-900 hover:bg-accent/90 text-lg px-8 py-4 h-auto"
+                  className="bg-accent text-neutral-900 hover:bg-accent/90 text-lg px-8 py-4 h-auto rounded-lg"
                 >
                   無料で相談する
                   <ChevronRight className="ml-2 h-5 w-5" />

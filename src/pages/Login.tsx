@@ -30,20 +30,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-neutral-50 flex items-center justify-center p-4 font-body">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
             <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-xl">F</span>
+              <span className="text-white font-bold text-xl font-heading">F</span>
             </div>
             <h1 className="text-2xl font-heading font-bold text-neutral-900">FUKIFUKI</h1>
             <p className="text-neutral-600 text-sm">退職代行サービス</p>
           </Link>
         </div>
 
-        <Card className="shadow-lg border-0">
+        <Card className="shadow-lg border-0 bg-white rounded-lg">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-heading text-neutral-900">
               {isSignUp ? "アカウント作成" : "ログイン"}
@@ -127,7 +127,7 @@ export default function Login() {
               
               <Button 
                 type="submit" 
-                className="w-full bg-primary hover:bg-primary/90 text-white"
+                className="w-full bg-primary hover:bg-primary/90 text-white rounded-lg"
               >
                 {isSignUp ? "アカウント作成" : "ログイン"}
               </Button>
@@ -145,7 +145,7 @@ export default function Login() {
             <Button
               type="button"
               variant="outline"
-              className="w-full border-neutral-300 text-neutral-900 hover:bg-neutral-50"
+              className="w-full bg-accent-light border-accent text-accent hover:bg-accent-light/80 rounded-lg"
               onClick={() => setIsSignUp(!isSignUp)}
             >
               {isSignUp ? "既存アカウントでログイン" : "新規アカウント作成"}
