@@ -70,15 +70,15 @@ export default function AdminCases() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-900 text-green-200 rounded-lg">完了</Badge>;
+        return <Badge className="bg-green-100 text-green-800 rounded-lg">完了</Badge>;
       case 'in_progress':
-        return <Badge className="bg-admin-primary/20 text-admin-primary rounded-lg">進行中</Badge>;
+        return <Badge className="bg-blue-100 text-blue-800 rounded-lg">進行中</Badge>;
       case 'submitted':
-        return <Badge className="bg-admin-secondary/20 text-admin-secondary rounded-lg">提出済み</Badge>;
+        return <Badge className="bg-purple-100 text-purple-800 rounded-lg">提出済み</Badge>;
       case 'draft':
-        return <Badge className="bg-gray-700 text-gray-300 rounded-lg">下書き</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800 rounded-lg">下書き</Badge>;
       default:
-        return <Badge variant="outline" className="rounded-lg border-admin-surface text-admin-text-secondary">不明</Badge>;
+        return <Badge variant="outline" className="rounded-lg">不明</Badge>;
     }
   };
 
@@ -115,7 +115,7 @@ export default function AdminCases() {
                 新規案件作成
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-admin-background-alt border-admin-surface rounded-lg">
+            <DialogContent className="bg-white border-neutral-200 rounded-lg">
               <DialogHeader>
                 <DialogTitle className="text-admin-text">新規案件作成</DialogTitle>
                 <DialogDescription className="text-admin-text-secondary">
@@ -130,7 +130,7 @@ export default function AdminCases() {
                     placeholder="株式会社○○"
                     value={newCase.company_name}
                     onChange={(e) => setNewCase({...newCase, company_name: e.target.value})}
-                    className="bg-admin-background border-admin-surface text-admin-text focus:border-admin-primary focus:ring-admin-primary"
+                    className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
                   />
                 </div>
                 <div className="space-y-2">
@@ -140,12 +140,12 @@ export default function AdminCases() {
                     placeholder="山田太郎"
                     value={newCase.employee_name}
                     onChange={(e) => setNewCase({...newCase, employee_name: e.target.value})}
-                    className="bg-admin-background border-admin-surface text-admin-text focus:border-admin-primary focus:ring-admin-primary"
+                    className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
                   />
                 </div>
                 <Button 
                   onClick={handleCreateCase} 
-                  className="w-full bg-admin-primary hover:bg-admin-primary/90 text-white"
+                  className="w-full bg-admin-primary hover:bg-admin-primary/90 text-white rounded-lg"
                 >
                   案件を作成
                 </Button>
@@ -155,7 +155,7 @@ export default function AdminCases() {
         </div>
 
         {/* Filters */}
-        <Card className="bg-admin-background-alt border-admin-surface rounded-lg">
+        <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
           <CardHeader>
             <CardTitle className="text-admin-text">検索・フィルター</CardTitle>
           </CardHeader>
@@ -168,17 +168,17 @@ export default function AdminCases() {
                     placeholder="会社名または従業員名で検索..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-admin-background border-admin-surface text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                    className="pl-10 bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
                   />
                 </div>
               </div>
               <div className="w-48">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="bg-admin-background border-admin-surface text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg">
+                  <SelectTrigger className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg">
                     <Filter className="mr-2 h-4 w-4" />
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-admin-background-alt border-admin-surface rounded-lg">
+                  <SelectContent className="bg-white border-neutral-200 rounded-lg">
                     <SelectItem value="all">すべてのステータス</SelectItem>
                     <SelectItem value="draft">下書き</SelectItem>
                     <SelectItem value="submitted">提出済み</SelectItem>
@@ -192,7 +192,7 @@ export default function AdminCases() {
         </Card>
 
         {/* Cases Table */}
-        <Card className="bg-admin-background-alt border-admin-surface rounded-lg">
+        <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
           <CardHeader>
             <CardTitle className="text-admin-text">案件一覧</CardTitle>
             <CardDescription className="text-admin-text-secondary">
@@ -202,18 +202,18 @@ export default function AdminCases() {
           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow className="border-admin-surface">
-                  <TableHead className="text-admin-text">会社名</TableHead>
-                  <TableHead className="text-admin-text">従業員名</TableHead>
-                  <TableHead className="text-admin-text">ステータス</TableHead>
-                  <TableHead className="text-admin-text">作成日</TableHead>
-                  <TableHead className="text-admin-text">最終連絡</TableHead>
-                  <TableHead className="text-admin-text">アクション</TableHead>
+                <TableRow className="border-neutral-200">
+                  <TableHead className="text-admin-text font-medium">会社名</TableHead>
+                  <TableHead className="text-admin-text font-medium">従業員名</TableHead>
+                  <TableHead className="text-admin-text font-medium">ステータス</TableHead>
+                  <TableHead className="text-admin-text font-medium">作成日</TableHead>
+                  <TableHead className="text-admin-text font-medium">最終連絡</TableHead>
+                  <TableHead className="text-admin-text font-medium">アクション</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCases.map((case_) => (
-                  <TableRow key={case_.id} className="border-admin-surface hover:bg-admin-background">
+                  <TableRow key={case_.id} className="border-neutral-200 hover:bg-neutral-50">
                     <TableCell className="font-medium text-admin-text">
                       <div className="flex items-center space-x-2">
                         <Building2 className="h-4 w-4 text-admin-text-secondary" />
@@ -246,7 +246,7 @@ export default function AdminCases() {
                         <Button variant="outline" size="sm" className="border-admin-secondary text-admin-secondary hover:bg-admin-secondary/10 rounded-lg">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" className="border-red-600 text-red-400 hover:bg-red-900/20 rounded-lg">
+                        <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-50 rounded-lg">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

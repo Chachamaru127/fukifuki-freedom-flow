@@ -6,61 +6,54 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
+  Settings, 
   Key, 
   Users, 
   Bell, 
   Mail,
-  Shield,
-  Database,
+  Save,
   Plus,
   Edit,
-  Trash2
+  Trash2,
+  Shield
 } from "lucide-react";
 import { AdminNavigation } from "@/components/AdminNavigation";
 
+// Mock data
 const staffMembers = [
-  { id: 1, name: '田中一郎', email: 'tanaka@fukifuki.com', role: 'admin', status: 'active' },
-  { id: 2, name: '佐藤花子', email: 'sato@fukifuki.com', role: 'staff', status: 'active' },
-  { id: 3, name: '鈴木太郎', email: 'suzuki@fukifuki.com', role: 'staff', status: 'inactive' },
+  { id: 1, name: "管理者", email: "admin@fukifuki.com", role: "admin", status: "active" },
+  { id: 2, name: "田中 太郎", email: "tanaka@fukifuki.com", role: "operator", status: "active" },
+  { id: 3, name: "佐藤 花子", email: "sato@fukifuki.com", role: "operator", status: "inactive" },
 ];
 
 export default function AdminSettings() {
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    autoResponse: true,
-    maintenanceMode: false,
+  const [notifications, setNotifications] = useState({
+    email: true,
+    sms: false,
+    slack: true,
   });
 
-  const [apiKeys, setApiKeys] = useState([
-    { id: 1, name: 'OpenAI API', key: 'sk-***...***', status: 'active' },
-    { id: 2, name: 'Twilio API', key: 'AC***...***', status: 'active' },
-    { id: 3, name: 'SendGrid API', key: 'SG***...***', status: 'inactive' },
-  ]);
+  const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
+  const [newStaff, setNewStaff] = useState({
+    name: "",
+    email: "",
+    role: "operator",
+  });
 
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return <Badge className="bg-admin-primary/20 text-admin-primary">管理者</Badge>;
-      case 'staff':
-        return <Badge className="bg-admin-secondary/20 text-admin-secondary">スタッフ</Badge>;
-      default:
-        return <Badge variant="outline" className="border-admin-surface text-admin-text-secondary">不明</Badge>;
-    }
+  const handleSaveSettings = () => {
+    // In real app, save to Supabase
+    console.log("Settings saved");
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-900 text-green-200">有効</Badge>;
-      case 'inactive':
-        return <Badge className="bg-gray-700 text-gray-300">無効</Badge>;
-      default:
-        return <Badge variant="outline" className="border-admin-surface text-admin-text-secondary">不明</Badge>;
-    }
+  const handleAddStaff = () => {
+    // In real app, create staff in Supabase
+    console.log("Adding staff:", newStaff);
+    setIsStaffModalOpen(false);
+    setNewStaff({ name: "", email: "", role: "operator" });
   };
 
   return (
@@ -69,248 +62,319 @@ export default function AdminSettings() {
       
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
-        <div>
+        <div className="mb-8">
           <h1 className="text-3xl font-bold font-heading text-admin-text">システム設定</h1>
-          <p className="text-admin-text-secondary">アプリケーションの設定を管理します</p>
+          <p className="text-admin-text-secondary">アプリケーションの設定とスタッフ管理</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* API Key Management */}
-          <Card className="bg-admin-background-alt rounded-lg border-admin-surface">
-            <CardHeader>
-              <CardTitle className="text-admin-text flex items-center space-x-2">
-                <Key className="h-5 w-5" />
-                <span>APIキー管理</span>
-              </CardTitle>
-              <CardDescription className="text-admin-text-secondary">
-                外部サービスとの接続設定
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {apiKeys.map((api) => (
-                  <div key={api.id} className="flex items-center justify-between p-3 border border-admin-surface rounded-lg bg-admin-background">
-                    <div className="space-y-1">
-                      <p className="font-medium text-admin-text">{api.name}</p>
-                      <p className="text-sm text-admin-text-secondary font-mono">{api.key}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {getStatusBadge(api.status)}
-                      <Button variant="ghost" size="sm" className="text-admin-text-secondary hover:text-admin-text">
-                        <Edit className="h-4 w-4" />
-                      </Button>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Main Settings */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* API Settings */}
+            <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-admin-text flex items-center">
+                  <Key className="mr-2 h-5 w-5" />
+                  API設定
+                </CardTitle>
+                <CardDescription className="text-admin-text-secondary">
+                  外部サービス連携のためのAPIキー管理
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="openai-key" className="text-admin-text">OpenAI APIキー</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="openai-key"
+                      type="password"
+                      placeholder="sk-..."
+                      className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                    />
+                    <Button variant="outline" className="border-admin-primary text-admin-primary hover:bg-admin-primary/10 rounded-lg">
+                      テスト
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="stripe-key" className="text-admin-text">Stripe秘密キー</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="stripe-key"
+                      type="password"
+                      placeholder="sk_live_..."
+                      className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                    />
+                    <Button variant="outline" className="border-admin-secondary text-admin-secondary hover:bg-admin-secondary/10 rounded-lg">
+                      検証
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="twilio-key" className="text-admin-text">Twilio SID</Label>
+                  <Input
+                    id="twilio-key"
+                    placeholder="AC..."
+                    className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Business Settings */}
+            <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-admin-text flex items-center">
+                  <Settings className="mr-2 h-5 w-5" />
+                  ビジネス設定
+                </CardTitle>
+                <CardDescription className="text-admin-text-secondary">
+                  料金プランと営業時間の設定
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="base-price" className="text-admin-text">基本料金</Label>
+                    <div className="relative">
+                      <Input
+                        id="base-price"
+                        type="number"
+                        defaultValue="29800"
+                        className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                      />
+                      <span className="absolute right-3 top-3 text-admin-text-secondary">円</span>
                     </div>
                   </div>
-                ))}
-                
-                <Button className="w-full bg-admin-primary hover:bg-admin-primary/90 text-white rounded-lg">
-                  <Plus className="mr-2 h-4 w-4" />
-                  新しいAPIキーを追加
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="urgent-fee" className="text-admin-text">緊急対応費</Label>
+                    <div className="relative">
+                      <Input
+                        id="urgent-fee"
+                        type="number"
+                        defaultValue="10000"
+                        className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                      />
+                      <span className="absolute right-3 top-3 text-admin-text-secondary">円</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="business-hours" className="text-admin-text">営業時間</Label>
+                  <Input
+                    id="business-hours"
+                    defaultValue="平日 9:00-18:00, 土日祝 10:00-16:00"
+                    className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="company-info" className="text-admin-text">会社概要</Label>
+                  <Textarea
+                    id="company-info"
+                    placeholder="会社の詳細情報..."
+                    rows={4}
+                    className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Notifications & Staff */}
+          <div className="space-y-6">
+            {/* Notification Settings */}
+            <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-admin-text flex items-center">
+                  <Bell className="mr-2 h-5 w-5" />
+                  通知設定
+                </CardTitle>
+                <CardDescription className="text-admin-text-secondary">
+                  各種通知の有効/無効切り替え
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-admin-text">メール通知</Label>
+                    <p className="text-sm text-admin-text-secondary">新規案件の通知</p>
+                  </div>
+                  <Switch
+                    checked={notifications.email}
+                    onCheckedChange={(checked) => setNotifications({...notifications, email: checked})}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-admin-text">SMS通知</Label>
+                    <p className="text-sm text-admin-text-secondary">緊急案件の通知</p>
+                  </div>
+                  <Switch
+                    checked={notifications.sms}
+                    onCheckedChange={(checked) => setNotifications({...notifications, sms: checked})}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-admin-text">Slack通知</Label>
+                    <p className="text-sm text-admin-text-secondary">チーム共有</p>
+                  </div>
+                  <Switch
+                    checked={notifications.slack}
+                    onCheckedChange={(checked) => setNotifications({...notifications, slack: checked})}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-admin-text">クイックアクション</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  onClick={handleSaveSettings}
+                  className="w-full bg-admin-primary hover:bg-admin-primary/90 text-white rounded-lg"
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  設定を保存
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Notification Settings */}
-          <Card className="bg-admin-background-alt rounded-lg border-admin-surface">
-            <CardHeader>
-              <CardTitle className="text-admin-text flex items-center space-x-2">
-                <Bell className="h-5 w-5" />
-                <span>通知設定</span>
-              </CardTitle>
-              <CardDescription className="text-admin-text-secondary">
-                システム通知の設定
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-admin-text">メール通知</Label>
-                  <p className="text-sm text-admin-text-secondary">新規案件や重要な更新をメールで通知</p>
-                </div>
-                <Switch 
-                  checked={settings.emailNotifications}
-                  onCheckedChange={(checked) => setSettings({...settings, emailNotifications: checked})}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-admin-text">SMS通知</Label>
-                  <p className="text-sm text-admin-text-secondary">緊急案件をSMSで通知</p>
-                </div>
-                <Switch 
-                  checked={settings.smsNotifications}
-                  onCheckedChange={(checked) => setSettings({...settings, smsNotifications: checked})}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-admin-text">自動応答</Label>
-                  <p className="text-sm text-admin-text-secondary">営業時間外の自動応答を有効化</p>
-                </div>
-                <Switch 
-                  checked={settings.autoResponse}
-                  onCheckedChange={(checked) => setSettings({...settings, autoResponse: checked})}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-admin-text">メンテナンスモード</Label>
-                  <p className="text-sm text-admin-text-secondary">システムメンテナンス中表示</p>
-                </div>
-                <Switch 
-                  checked={settings.maintenanceMode}
-                  onCheckedChange={(checked) => setSettings({...settings, maintenanceMode: checked})}
-                />
-              </div>
-            </CardContent>
-          </Card>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full border-admin-secondary text-admin-secondary hover:bg-admin-secondary/10 rounded-lg"
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  テストメール送信
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Staff Management */}
-        <Card className="bg-admin-background-alt rounded-lg border-admin-surface">
+        <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
           <CardHeader>
-            <CardTitle className="text-admin-text flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>スタッフアカウント管理</span>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-admin-text flex items-center">
+                  <Users className="mr-2 h-5 w-5" />
+                  スタッフ管理
+                </CardTitle>
+                <CardDescription className="text-admin-text-secondary">
+                  システムアクセス権限を持つスタッフの管理
+                </CardDescription>
               </div>
-              <Button className="bg-admin-primary hover:bg-admin-primary/90 text-white rounded-lg">
-                <Plus className="mr-2 h-4 w-4" />
-                新規スタッフ追加
-              </Button>
-            </CardTitle>
-            <CardDescription className="text-admin-text-secondary">
-              システムにアクセスできるスタッフアカウントの管理
-            </CardDescription>
+              
+              <Dialog open={isStaffModalOpen} onOpenChange={setIsStaffModalOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-admin-secondary hover:bg-admin-secondary/90 text-white rounded-lg">
+                    <Plus className="mr-2 h-4 w-4" />
+                    スタッフ追加
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-white border-neutral-200 rounded-lg">
+                  <DialogHeader>
+                    <DialogTitle className="text-admin-text">新規スタッフ追加</DialogTitle>
+                    <DialogDescription className="text-admin-text-secondary">
+                      新しいスタッフアカウントを作成します
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="staff-name" className="text-admin-text">氏名</Label>
+                      <Input
+                        id="staff-name"
+                        value={newStaff.name}
+                        onChange={(e) => setNewStaff({...newStaff, name: e.target.value})}
+                        className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="staff-email" className="text-admin-text">メールアドレス</Label>
+                      <Input
+                        id="staff-email"
+                        type="email"
+                        value={newStaff.email}
+                        onChange={(e) => setNewStaff({...newStaff, email: e.target.value})}
+                        className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleAddStaff} 
+                      className="w-full bg-admin-secondary hover:bg-admin-secondary/90 text-white rounded-lg"
+                    >
+                      スタッフを追加
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {staffMembers.map((staff) => (
-                <div key={staff.id} className="flex items-center justify-between p-4 border border-admin-surface rounded-lg bg-admin-background">
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <p className="font-medium text-admin-text">{staff.name}</p>
-                      {getRoleBadge(staff.role)}
-                    </div>
-                    <p className="text-sm text-admin-text-secondary">{staff.email}</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getStatusBadge(staff.status)}
-                    <Button variant="ghost" size="sm" className="text-admin-text-secondary hover:text-admin-text">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-neutral-200">
+                  <TableHead className="text-admin-text font-medium">名前</TableHead>
+                  <TableHead className="text-admin-text font-medium">メール</TableHead>
+                  <TableHead className="text-admin-text font-medium">権限</TableHead>
+                  <TableHead className="text-admin-text font-medium">ステータス</TableHead>
+                  <TableHead className="text-admin-text font-medium">アクション</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {staffMembers.map((staff) => (
+                  <TableRow key={staff.id} className="border-neutral-200 hover:bg-neutral-50">
+                    <TableCell className="font-medium text-admin-text">{staff.name}</TableCell>
+                    <TableCell className="text-admin-text">{staff.email}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        className={`rounded-lg ${
+                          staff.role === 'admin' 
+                            ? 'bg-red-100 text-red-800' 
+                            : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
+                        {staff.role === 'admin' ? '管理者' : 'オペレーター'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        className={`rounded-lg ${
+                          staff.status === 'active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {staff.status === 'active' ? 'アクティブ' : '非アクティブ'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm" className="border-admin-primary text-admin-primary hover:bg-admin-primary/10 rounded-lg">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        {staff.role !== 'admin' && (
+                          <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-50 rounded-lg">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
-
-        {/* System Configuration */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-admin-background-alt rounded-lg border-admin-surface">
-            <CardHeader>
-              <CardTitle className="text-admin-text flex items-center space-x-2">
-                <Database className="h-5 w-5" />
-                <span>システム設定</span>
-              </CardTitle>
-              <CardDescription className="text-admin-text-secondary">
-                基本的なシステム設定
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-admin-text">サイト名</Label>
-                <Input 
-                  defaultValue="FUKIFUKI - 退職代行サービス"
-                  className="bg-admin-background border-admin-surface text-admin-text focus:border-admin-primary"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-admin-text">営業時間</Label>
-                <Select defaultValue="9-18">
-                  <SelectTrigger className="bg-admin-background border-admin-surface text-admin-text">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-admin-background-alt border-admin-surface">
-                    <SelectItem value="9-18">9:00 - 18:00</SelectItem>
-                    <SelectItem value="24h">24時間対応</SelectItem>
-                    <SelectItem value="custom">カスタム設定</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-admin-text">メンテナンス通知</Label>
-                <Textarea 
-                  placeholder="メンテナンス中に表示するメッセージ..."
-                  className="bg-admin-background border-admin-surface text-admin-text focus:border-admin-primary"
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-admin-background-alt rounded-lg border-admin-surface">
-            <CardHeader>
-              <CardTitle className="text-admin-text flex items-center space-x-2">
-                <Shield className="h-5 w-5" />
-                <span>セキュリティ設定</span>
-              </CardTitle>
-              <CardDescription className="text-admin-text-secondary">
-                システムのセキュリティ設定
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-admin-text">セッション時間（分）</Label>
-                <Input 
-                  type="number"
-                  defaultValue="120"
-                  className="bg-admin-background border-admin-surface text-admin-text focus:border-admin-primary"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-admin-text">パスワード有効期限（日）</Label>
-                <Input 
-                  type="number"
-                  defaultValue="90"
-                  className="bg-admin-background border-admin-surface text-admin-text focus:border-admin-primary"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-admin-text">ログイン試行回数</Label>
-                <Select defaultValue="5">
-                  <SelectTrigger className="bg-admin-background border-admin-surface text-admin-text">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-admin-background-alt border-admin-surface">
-                    <SelectItem value="3">3回</SelectItem>
-                    <SelectItem value="5">5回</SelectItem>
-                    <SelectItem value="10">10回</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button className="bg-admin-primary hover:bg-admin-primary/90 text-white rounded-lg px-8">
-            設定を保存
-          </Button>
-        </div>
       </div>
     </div>
   );
