@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AlertCircle, Mail, User, Phone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserNavigation } from "@/components/UserNavigation";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -19,27 +21,78 @@ export default function Signup() {
     agreeToTerms: false,
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     
-    if (!formData.agreeToTerms) {
-      setError("利用規約に同意してください");
-      return;
-    }
-    
-    if (formData.password !== formData.confirmPassword) {
-      setError("パスワードが一致しません");
-      return;
-    }
-    
-    // Simulate signup - in real app, use Supabase
-    if (formData.email && formData.password && formData.name) {
-      navigate("/mypage");
-    } else {
-      setError("すべての必須項目を入力してください");
+    try {
+      if (!formData.agreeToTerms) {
+        setError("利用規約に同意してください");
+        return;
+      }
+      
+      if (formData.password !== formData.confirmPassword) {
+        setError("パスワードが一致しません");
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        setError("パスワードは6文字以上で入力してください");
+        return;
+      }
+      
+      if (!formData.email || !formData.password || !formData.name || !formData.phone) {
+        setError("すべての必須項目を入力してください");
+        return;
+      }
+
+      // Supabaseでユーザーを作成
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            name: formData.name,
+          }
+        }
+      });
+
+      if (signUpError) {
+        if (signUpError.message.includes('User already registered')) {
+          setError("このメールアドレスは既に登録されています");
+        } else {
+          setError(signUpError.message);
+        }
+        return;
+      }
+
+      if (data.user) {
+        // プロフィール情報を更新
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            phone: formData.phone,
+          })
+          .eq('id', data.user.id);
+
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+          // プロフィール更新エラーは致命的ではないため、続行
+        }
+
+        toast.success("アカウントが作成されました！");
+        navigate("/mypage");
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError("アカウント作成中にエラーが発生しました");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,6 +132,7 @@ export default function Signup() {
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       className="pl-10 border-gray-300 focus:border-user-primary focus:ring-user-primary"
                       required
+                      disabled={loading}
                     />
                     <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   </div>
@@ -95,6 +149,7 @@ export default function Signup() {
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
                       className="pl-10 border-gray-300 focus:border-user-primary focus:ring-user-primary"
                       required
+                      disabled={loading}
                     />
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   </div>
@@ -111,6 +166,7 @@ export default function Signup() {
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       className="pl-10 border-gray-300 focus:border-user-primary focus:ring-user-primary"
                       required
+                      disabled={loading}
                     />
                     <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   </div>
@@ -126,6 +182,8 @@ export default function Signup() {
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     className="border-gray-300 focus:border-user-primary focus:ring-user-primary"
                     required
+                    disabled={loading}
+                    minLength={6}
                   />
                 </div>
 
@@ -139,6 +197,8 @@ export default function Signup() {
                     onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                     className="border-gray-300 focus:border-user-primary focus:ring-user-primary"
                     required
+                    disabled={loading}
+                    minLength={6}
                   />
                 </div>
 
@@ -147,6 +207,7 @@ export default function Signup() {
                     id="terms"
                     checked={formData.agreeToTerms}
                     onCheckedChange={(checked) => setFormData({...formData, agreeToTerms: checked as boolean})}
+                    disabled={loading}
                   />
                   <Label htmlFor="terms" className="text-sm text-user-text-secondary">
                     <Link to="/terms" className="text-user-primary hover:underline">利用規約</Link>と
@@ -157,8 +218,9 @@ export default function Signup() {
                 <Button 
                   type="submit" 
                   className="w-full bg-user-primary hover:bg-user-primary/90 text-white rounded-lg"
+                  disabled={loading}
                 >
-                  アカウントを作成
+                  {loading ? "作成中..." : "アカウントを作成"}
                 </Button>
               </form>
 
