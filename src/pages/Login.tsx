@@ -26,17 +26,22 @@ export default function Login() {
     setLoading(true);
 
     try {
+      console.log('Attempting login with:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('Login error:', error);
         setError("ログインに失敗しました。メールアドレスとパスワードをご確認ください");
         return;
       }
 
       if (data.user) {
+        console.log('Login successful, user:', data.user.id);
+        
         // Get user role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -49,6 +54,8 @@ export default function Login() {
           setError("ユーザー情報の取得に失敗しました");
           return;
         }
+
+        console.log('User role:', profile?.role);
 
         // Redirect based on role
         if (profile?.role === 'admin') {
@@ -73,6 +80,8 @@ export default function Login() {
     setLoading(true);
 
     try {
+      console.log('Attempting signup with:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -85,6 +94,7 @@ export default function Login() {
       });
 
       if (error) {
+        console.error('Signup error:', error);
         if (error.message.includes('already registered')) {
           setError("このメールアドレスは既に登録されています");
         } else {
@@ -94,6 +104,7 @@ export default function Login() {
       }
 
       if (data.user) {
+        console.log('Signup successful, user:', data.user.id);
         toast.success("アカウントが作成されました。確認メールをご確認ください");
         navigate("/mypage");
       }
