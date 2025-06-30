@@ -98,10 +98,15 @@ export const callResultsService = {
 export const profilesService = {
   // Get current user profile
   async getCurrentUserProfile(): Promise<QueryResult<Profile>> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { data: null, error: { message: 'User not authenticated' } };
+    }
+
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', (await supabase.auth.getUser()).data.user?.id)
+      .eq('id', user.id)
       .single();
     
     return { data, error };
@@ -109,15 +114,15 @@ export const profilesService = {
 
   // Update current user profile
   async updateCurrentUserProfile(updates: ProfileUpdate): Promise<QueryResult<Profile>> {
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    if (!userId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return { data: null, error: { message: 'User not authenticated' } };
     }
 
     const { data, error } = await supabase
       .from('profiles')
       .update(updates)
-      .eq('id', userId)
+      .eq('id', user.id)
       .select()
       .single();
     
