@@ -208,7 +208,7 @@ export default function AdminCases() {
           </Dialog>
         </div>
 
-        {/* Filters */}
+        {/* Search and Filter Section - ENHANCED */}
         <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
           <CardHeader>
             <CardTitle className="text-admin-text">検索・フィルター</CardTitle>
@@ -232,7 +232,7 @@ export default function AdminCases() {
                     <Filter className="mr-2 h-4 w-4" />
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-neutral-200 rounded-lg">
+                  <SelectContent className="bg-white border-neutral-200 rounded-lg z-50">
                     <SelectItem value="all">すべてのステータス</SelectItem>
                     <SelectItem value="draft">下書き</SelectItem>
                     <SelectItem value="submitted">提出済み</SelectItem>
@@ -248,7 +248,7 @@ export default function AdminCases() {
           </CardContent>
         </Card>
 
-        {/* Cases Table */}
+        {/* Cases Table - ENHANCED WITH STATUS UPDATE */}
         <Card className="bg-white border-neutral-200 rounded-lg shadow-sm">
           <CardHeader>
             <CardTitle className="text-admin-text">案件一覧</CardTitle>
@@ -289,10 +289,10 @@ export default function AdminCases() {
                         onValueChange={(value) => handleStatusUpdate(case_.id, value)}
                         disabled={updateCaseMutation.isPending}
                       >
-                        <SelectTrigger className="w-32 h-8 text-xs">
+                        <SelectTrigger className="w-32 h-8 text-xs bg-white border-neutral-300">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white border-neutral-200 rounded-lg z-50">
                           <SelectItem value="draft">下書き</SelectItem>
                           <SelectItem value="submitted">提出済み</SelectItem>
                           <SelectItem value="hearing">ヒアリング中</SelectItem>
