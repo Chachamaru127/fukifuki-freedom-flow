@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { authHelpers } from './useAuthHelpers';
 
 interface AuthContextType {
   user: User | null;
@@ -20,28 +21,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRole = async (userId: string) => {
-    try {
-      console.log('Fetching user role for:', userId);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user role:', error);
-        return null;
-      }
-
-      console.log('User role fetched:', data?.role);
-      return data?.role || null;
-    } catch (err) {
-      console.error('Error in fetchUserRole:', err);
-      return null;
-    }
-  };
-
   useEffect(() => {
     console.log('Setting up auth state listener');
     
@@ -53,8 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const role = await fetchUserRole(session.user.id);
-          setUserRole(role);
+          // Use setTimeout to prevent potential deadlock
+          setTimeout(async () => {
+            const role = await authHelpers.fetchUserRole(session.user.id);
+            setUserRole(role);
+          }, 0);
         } else {
           setUserRole(null);
         }
@@ -79,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const role = await fetchUserRole(session.user.id);
+          const role = await authHelpers.fetchUserRole(session.user.id);
           setUserRole(role);
         }
         

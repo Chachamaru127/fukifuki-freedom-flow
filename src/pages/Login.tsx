@@ -9,6 +9,7 @@ import { AlertCircle, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { authHelpers } from "@/hooks/useAuthHelpers";
 
 export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -39,47 +40,12 @@ export default function Login() {
         return;
       }
 
-      if (data.user) {
-        console.log('Login successful, user:', data.user.id);
-        
-        try {
-          // Get user role
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', data.user.id)
-            .single();
+      await authHelpers.handleLoginSuccess(data, navigate);
 
-          if (profileError) {
-            console.error('Profile fetch error:', profileError);
-            setError("ユーザー情報の取得に失敗しました");
-            return;
-          }
-
-          console.log('User role:', profile?.role);
-
-          // Use setTimeout to ensure state updates are processed before navigation
-          setTimeout(() => {
-            // Redirect based on role
-            if (profile?.role === 'admin') {
-              toast.success("管理者としてログインしました");
-              navigate("/admin/dashboard", { replace: true });
-            } else {
-              toast.success("ログインしました");
-              navigate("/mypage", { replace: true });
-            }
-          }, 100);
-          
-        } catch (profileErr) {
-          console.error('Profile error:', profileErr);
-          setError("プロフィール取得中にエラーが発生しました");
-        }
-      }
     } catch (err) {
       console.error('Login error:', err);
       setError("ログイン中にエラーが発生しました");
     } finally {
-      // Ensure loading is always set to false
       setTimeout(() => {
         setLoading(false);
       }, 200);
