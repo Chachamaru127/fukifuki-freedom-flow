@@ -1,196 +1,167 @@
 
-# FUKIFUKI - 退職代行サービス
+# FUKIFUKI - 退職代行サービス フロントエンド
 
-確実・迅速・安心の退職代行サービス
+## 概要
+AI音声対話型の退職代行サービス「FUKIFUKI」のフロントエンドアプリケーション
 
-## 🚀 プロジェクト概要
+## 技術スタック
+- Frontend: React + TypeScript + Vite
+- UI: shadcn/ui + Tailwind CSS  
+- Database: Supabase (PostgreSQL + Auth + RLS)
+- 将来実装: FastAPI + MIDORI Engine (LiveKit)
 
-FUKIFUKIは、労働問題のプロフェッショナルが提供する退職代行サービスのWebアプリケーションです。ユーザーフレンドリーなインターフェースと確実な退職手続きサポートを提供します。
+## セットアップ手順
 
-## ⚡ セットアップ手順
+### 1. 必要条件
+- Node.js 18+
+- npm または pnpm
+- Supabaseアカウント
 
-### 1. リポジトリのクローン
+### 2. インストール
 ```bash
-git clone <YOUR_REPOSITORY_URL>
-cd fukifuki
-```
-
-### 2. 依存関係のインストール
-```bash
+git clone [your-repo-url]
+cd fukifuki-frontend
 npm install
 ```
 
-### 3. Supabaseプロジェクトの設定
-1. [Supabase](https://supabase.com) でプロジェクトを作成
-2. SQL Editorで以下のテーブルを作成:
+### 3. Supabase設定
+1. [Supabase](https://supabase.com)でプロジェクト作成
+2. SQL Editorで以下を実行:
+   - テーブル作成スクリプト（既存のマイグレーションファイル）
+   - RLSポリシー設定
 
-```sql
--- プロフィールテーブル
-CREATE TABLE profiles (
-  id UUID REFERENCES auth.users PRIMARY KEY,
-  name TEXT,
-  phone TEXT,
-  role TEXT DEFAULT 'user',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 案件テーブル
-CREATE TABLE cases (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users NOT NULL,
-  company_name TEXT NOT NULL,
-  status TEXT CHECK (status IN ('draft', 'submitted', 'hearing', 'negotiating', 'completed')) DEFAULT 'draft',
-  reason TEXT,
-  employee_name TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 通話記録テーブル
-CREATE TABLE call_results (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  case_id UUID REFERENCES cases NOT NULL,
-  transcript TEXT,
-  result_json JSONB,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-### 4. 環境変数の設定
-1. `.env.example`を`.env`にコピー
-2. Supabaseの設定値を入力:
+### 4. 環境変数
 ```bash
 cp .env.example .env
+# .envファイルを編集してSupabase認証情報を設定
 ```
 
-### 5. 開発サーバーの起動
+### 5. 開発サーバー起動
 ```bash
 npm run dev
 ```
 
-## ✨ 機能一覧
-
-### ユーザー機能
-- 🔐 **認証システム** - メール/パスワード認証
-- 📝 **案件作成** - 退職相談フォーム
-- 📊 **案件管理** - 自分の案件一覧・進捗確認
-- 📈 **進捗追跡** - リアルタイム状況更新
-
-### 管理者機能
-- 📊 **ダッシュボード** - KPI表示・統計情報
-- 📋 **案件管理** - 全案件の監視・ステータス更新
-- 🔍 **検索・フィルター** - 効率的な案件管理
-- 📈 **レポート** - 月次推移・成果分析
-
-## 🛠 技術スタック
-
-### フロントエンド
-- **React 18** + **TypeScript** - モダンなUI開発
-- **Vite** - 高速ビルドツール
-- **Tailwind CSS** - ユーティリティファーストCSS
-- **shadcn/ui** - 高品質UIコンポーネント
-- **React Router v6** - SPA ルーティング
-- **TanStack Query** - データフェッチング・状態管理
-
-### バックエンド
-- **Supabase** - PostgreSQL + 認証 + リアルタイム
-- **Row Level Security (RLS)** - セキュアなデータアクセス
-
-### 将来の実装
-- **LiveKit** - リアルタイム通話機能
-- **FastAPI + MIDORI** - AI音声アシスタント
-
-## 🎨 デザインシステム
-
-### カラーパレット
-- **Primary**: #0066CC (信頼感のあるブルー)
-- **Accent**: #FFB703 (活気のあるオレンジ)
-- **Secondary**: #10B981 (成功を表すグリーン)
-
-### フォント
-- **見出し**: M PLUS 1p
-- **本文**: Noto Sans JP
-
-## 📁 プロジェクト構造
-
+## プロジェクト構成
 ```
 src/
-├── components/          # 再利用可能コンポーネント
-│   ├── ui/             # shadcn/ui コンポーネント
+├── components/         # 再利用可能なコンポーネント
+│   ├── ui/            # shadcn/uiコンポーネント
 │   ├── UserNavigation.tsx
 │   └── AdminNavigation.tsx
-├── hooks/              # カスタムフック
-│   ├── useAuth.tsx     # 認証管理
-│   ├── useCases.tsx    # 案件管理
-│   └── useStatistics.tsx
-├── pages/              # ページコンポーネント
-│   ├── Index.tsx       # ランディングページ
-│   ├── Login.tsx       # 認証ページ
-│   ├── MyPage.tsx      # ユーザーダッシュボード
-│   ├── ConsultationNew.tsx # 新規相談
+├── hooks/             # カスタムフック（データ取得等）
+│   ├── useAuth.tsx
+│   ├── useCases.tsx
+│   └── useProfile.tsx
+├── lib/               # ユーティリティ、型定義
+│   ├── utils.ts
+│   └── database.types.ts
+├── pages/             # ページコンポーネント
+│   ├── Index.tsx      # ランディングページ
+│   ├── Login.tsx      # ログインページ
+│   ├── MyPage.tsx     # ユーザーダッシュボード
+│   ├── ConsultationNew.tsx # 新規相談申込
 │   ├── AdminDashboard.tsx  # 管理者ダッシュボード
 │   └── AdminCases.tsx      # 管理者案件管理
-├── lib/                # ユーティリティ
-│   ├── utils.ts        # 共通関数
-│   └── database-utils.ts # DB操作ヘルパー
-└── integrations/       # 外部サービス連携
-    └── supabase/       # Supabase設定
+└── integrations/      # 外部サービス連携
+    └── supabase/      # Supabase設定
 ```
 
-## 🔧 実装済み機能
+## 機能一覧
 
-- ✅ レスポンシブランディングページ
-- ✅ 認証システム (Supabase Auth)
-- ✅ ユーザーダッシュボード (案件管理)
-- ✅ 管理者ダッシュボード (統計・KPI)
-- ✅ 案件CRUD操作
-- ✅ リアルタイムデータ更新
-- ✅ ステータス管理（5段階）
-- ✅ 検索・フィルター機能
-- ⏳ 通話機能 (UI実装済み、LiveKit統合待ち)
+### エンドユーザー機能
+- ✅ ユーザー登録・ログイン
+- ✅ 退職相談申込
+- ✅ 案件進捗確認
+- ✅ プロフィール管理
 
-## 🚀 デプロイ
+### 管理者機能
+- ✅ 全案件管理
+- ✅ ステータス更新
+- ✅ 統計ダッシュボード
+- ✅ 検索・フィルター
 
-### Vercel へのデプロイ
+### セキュリティ機能
+- ✅ Row Level Security (RLS) による権限制御
+- ✅ 認証必須のプロテクトルート
+- ✅ ユーザー別データアクセス制限
+
+## 環境変数設定
+`.env`ファイルに以下の変数を設定してください：
+
 ```bash
-# Vercel CLI をインストール
-npm i -g vercel
+# Supabase
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# デプロイ
-vercel --prod
+# LiveKit (将来の実装用)
+LIVEKIT_URL=your_livekit_server_url
+LIVEKIT_API_KEY=your_livekit_api_key
+LIVEKIT_API_SECRET=your_livekit_api_secret
+
+# AI Services (将来の実装用)
+OPENAI_API_KEY=your_openai_api_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-### 環境変数設定
-Vercelの管理画面で以下の環境変数を設定：
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+## データベーススキーマ
 
-## 📊 パフォーマンス目標
+### profiles テーブル
+- ユーザープロフィール情報
+- 権限管理（user/admin）
 
-- Lighthouse Performance: 90+
-- Lighthouse Accessibility: 90+
-- Lighthouse Best Practices: 90+
-- Lighthouse SEO: 90+
+### cases テーブル
+- 退職代行案件管理
+- ステータス管理（draft/submitted/hearing/negotiating/completed）
 
-## 🤝 コントリビューション
+### call_results テーブル
+- 通話記録保存（将来実装）
 
-1. このリポジトリをフォーク
-2. フィーチャーブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add some amazing feature'`)
-4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
-5. Pull Requestを作成
+## 開発・デプロイ
 
-## 📄 ライセンス
+### 開発
+```bash
+npm run dev          # 開発サーバー起動
+npm run build        # プロダクションビルド
+npm run preview      # ビルド結果プレビュー
+npm run lint         # ESLintチェック
+```
 
-このプロジェクトは MIT ライセンスの下で公開されています。
+### デプロイ
+```bash
+npm run build
+# distフォルダをVercel/Netlifyにデプロイ
+```
 
-## 📞 サポート
+## API エンドポイント
 
+### 認証
+- POST `/auth/login` - ログイン
+- POST `/auth/signup` - ユーザー登録
+- POST `/auth/logout` - ログアウト
+
+### 案件管理
+- GET `/api/cases` - 案件一覧取得
+- POST `/api/cases` - 新規案件作成
+- PUT `/api/cases/:id` - 案件更新
+- DELETE `/api/cases/:id` - 案件削除
+
+### プロフィール
+- GET `/api/profile` - プロフィール取得
+- PUT `/api/profile` - プロフィール更新
+
+## ライセンス
+MIT License
+
+## 将来の機能拡張
+- 🔄 LiveKitによるリアルタイム通話機能
+- 🤖 MIDORI EngineによるAI音声アシスタント
+- 📊 高度な分析・レポート機能
+- 📱 モバイルアプリ対応
+
+## サポート
 ご質問やサポートが必要な場合は、以下までお問い合わせください：
-- Email: info@fukifuki.app
-- Tel: 0120-XXX-XXX (24時間365日対応)
+- Email: support@fukifuki.app
+- GitHub Issues: プロジェクトのIssuesページ
 
 ---
-
-**退職代行フキフキ** - あなたの新しいスタートを応援します 🌟
+**FUKIFUKI** - あなたの新しいスタートを支援する退職代行サービス 🌟
