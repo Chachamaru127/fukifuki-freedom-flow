@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserNavigation } from "@/components/UserNavigation";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Case {
   id: string;
@@ -30,28 +30,21 @@ interface Case {
 export default function MyPage() {
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkUser();
-    fetchCases();
-  }, []);
-
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/login');
-      return;
+    if (user) {
+      fetchCases();
     }
-    setUser(session.user);
-  };
+  }, [user]);
 
   const fetchCases = async () => {
     try {
       const { data, error } = await supabase
         .from('cases')
         .select('*')
+        .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -69,13 +62,8 @@ export default function MyPage() {
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("ログアウトに失敗しました");
-    } else {
-      toast.success("ログアウトしました");
-      navigate('/');
-    }
+    await signOut();
+    navigate('/');
   };
 
   const getStatusBadge = (status: string) => {
@@ -170,7 +158,6 @@ export default function MyPage() {
           </div>
         </div>
 
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="bg-white rounded-lg border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

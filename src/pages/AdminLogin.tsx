@@ -6,23 +6,62 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, Mail, Lock, Eye, EyeOff, Shield } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     
-    // Simulate admin auth - in real app, use Supabase with role check
-    if (email && password) {
-      navigate("/admin/dashboard");
-    } else {
-      setError("管理者ログインに失敗しました。認証情報をご確認ください");
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError("管理者ログインに失敗しました。認証情報をご確認ください");
+        return;
+      }
+
+      if (data.user) {
+        // Get user role and verify admin access
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          setError("ユーザー情報の取得に失敗しました");
+          await supabase.auth.signOut(); // Sign out if profile can't be fetched
+          return;
+        }
+
+        if (profile?.role !== 'admin') {
+          setError("管理者権限がありません。一般ユーザーの方は通常ログインをご利用ください");
+          await supabase.auth.signOut(); // Sign out non-admin users
+          return;
+        }
+
+        toast.success("管理者としてログインしました");
+        navigate("/admin/dashboard");
+      }
+    } catch (err) {
+      console.error('Admin login error:', err);
+      setError("ログイン中にエラーが発生しました");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,6 +107,7 @@ export default function AdminLogin() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 border-neutral-300 focus:border-admin-secondary focus:ring-admin-secondary bg-white"
                     required
+                    disabled={loading}
                   />
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-admin-text-secondary" />
                 </div>
@@ -84,6 +124,7 @@ export default function AdminLogin() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10 border-neutral-300 focus:border-admin-secondary focus:ring-admin-secondary bg-white"
                     required
+                    disabled={loading}
                   />
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-admin-text-secondary" />
                   <Button
@@ -92,6 +133,7 @@ export default function AdminLogin() {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4 text-admin-text-secondary" />
@@ -105,8 +147,9 @@ export default function AdminLogin() {
               <Button 
                 type="submit" 
                 className="w-full bg-admin-secondary hover:bg-admin-secondary/90 text-white rounded-lg"
+                disabled={loading}
               >
-                ログイン
+                {loading ? "認証中..." : "ログイン"}
               </Button>
             </form>
           </CardContent>

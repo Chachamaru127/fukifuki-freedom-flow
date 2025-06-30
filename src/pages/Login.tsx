@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { AlertCircle, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -15,19 +17,95 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
-    // Simulate auth - in real app, use Supabase
-    if (email && password) {
-      navigate("/dashboard");
-    } else {
-      setError("ログインに失敗しました。メールアドレスとパスワードをご確認ください");
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError("ログインに失敗しました。メールアドレスとパスワードをご確認ください");
+        return;
+      }
+
+      if (data.user) {
+        // Get user role
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          setError("ユーザー情報の取得に失敗しました");
+          return;
+        }
+
+        // Redirect based on role
+        if (profile?.role === 'admin') {
+          toast.success("管理者としてログインしました");
+          navigate("/admin/dashboard");
+        } else {
+          toast.success("ログインしました");
+          navigate("/mypage");
+        }
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError("ログイン中にエラーが発生しました");
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/mypage`,
+          data: {
+            name: name,
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.includes('already registered')) {
+          setError("このメールアドレスは既に登録されています");
+        } else {
+          setError("アカウント作成に失敗しました。入力内容をご確認ください");
+        }
+        return;
+      }
+
+      if (data.user) {
+        toast.success("アカウントが作成されました。確認メールをご確認ください");
+        navigate("/mypage");
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError("アカウント作成中にエラーが発生しました");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = isSignUp ? handleSignUp : handleSignIn;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-neutral-50 flex items-center justify-center p-4 font-body">
@@ -76,6 +154,7 @@ export default function Login() {
                     onChange={(e) => setName(e.target.value)}
                     className="border-neutral-300 focus:border-primary focus:ring-primary"
                     required={isSignUp}
+                    disabled={loading}
                   />
                 </div>
               )}
@@ -91,6 +170,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 border-neutral-300 focus:border-primary focus:ring-primary"
                     required
+                    disabled={loading}
                   />
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-neutral-500" />
                 </div>
@@ -107,6 +187,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10 border-neutral-300 focus:border-primary focus:ring-primary"
                     required
+                    disabled={loading}
                   />
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-neutral-500" />
                   <Button
@@ -115,6 +196,7 @@ export default function Login() {
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4 text-neutral-500" />
@@ -128,8 +210,9 @@ export default function Login() {
               <Button 
                 type="submit" 
                 className="w-full bg-primary hover:bg-primary/90 text-white rounded-lg"
+                disabled={loading}
               >
-                {isSignUp ? "アカウント作成" : "ログイン"}
+                {loading ? "処理中..." : (isSignUp ? "アカウント作成" : "ログイン")}
               </Button>
             </form>
 
@@ -147,6 +230,7 @@ export default function Login() {
               variant="outline"
               className="w-full bg-accent-light border-accent text-accent hover:bg-accent-light/80 rounded-lg"
               onClick={() => setIsSignUp(!isSignUp)}
+              disabled={loading}
             >
               {isSignUp ? "既存アカウントでログイン" : "新規アカウント作成"}
             </Button>
