@@ -42,35 +42,47 @@ export default function Login() {
       if (data.user) {
         console.log('Login successful, user:', data.user.id);
         
-        // Get user role
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single();
+        try {
+          // Get user role
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', data.user.id)
+            .single();
 
-        if (profileError) {
-          console.error('Profile fetch error:', profileError);
-          setError("ユーザー情報の取得に失敗しました");
-          return;
-        }
+          if (profileError) {
+            console.error('Profile fetch error:', profileError);
+            setError("ユーザー情報の取得に失敗しました");
+            return;
+          }
 
-        console.log('User role:', profile?.role);
+          console.log('User role:', profile?.role);
 
-        // Redirect based on role
-        if (profile?.role === 'admin') {
-          toast.success("管理者としてログインしました");
-          navigate("/admin/dashboard");
-        } else {
-          toast.success("ログインしました");
-          navigate("/mypage");
+          // Use setTimeout to ensure state updates are processed before navigation
+          setTimeout(() => {
+            // Redirect based on role
+            if (profile?.role === 'admin') {
+              toast.success("管理者としてログインしました");
+              navigate("/admin/dashboard", { replace: true });
+            } else {
+              toast.success("ログインしました");
+              navigate("/mypage", { replace: true });
+            }
+          }, 100);
+          
+        } catch (profileErr) {
+          console.error('Profile error:', profileErr);
+          setError("プロフィール取得中にエラーが発生しました");
         }
       }
     } catch (err) {
       console.error('Login error:', err);
       setError("ログイン中にエラーが発生しました");
     } finally {
-      setLoading(false);
+      // Ensure loading is always set to false
+      setTimeout(() => {
+        setLoading(false);
+      }, 200);
     }
   };
 
@@ -106,7 +118,7 @@ export default function Login() {
       if (data.user) {
         console.log('Signup successful, user:', data.user.id);
         toast.success("アカウントが作成されました。確認メールをご確認ください");
-        navigate("/mypage");
+        navigate("/mypage", { replace: true });
       }
     } catch (err) {
       console.error('Signup error:', err);
