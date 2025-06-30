@@ -17,55 +17,32 @@ import {
   Trash2,
   Building2,
   Calendar,
-  User
+  User,
+  Eye
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AdminNavigation } from "@/components/AdminNavigation";
-
-// Mock data - in real app, fetch from Supabase
-const mockCases = [
-  {
-    id: '1',
-    company_name: '株式会社サンプル',
-    employee_name: '田中一郎',
-    status: 'completed',
-    created_at: '2024-01-15',
-    last_contact: '2024-01-20',
-  },
-  {
-    id: '2',
-    company_name: 'テスト商事株式会社',
-    employee_name: '佐藤花子',
-    status: 'in_progress',
-    created_at: '2024-01-18',
-    last_contact: '2024-01-22',
-  },
-  {
-    id: '3',
-    company_name: '例示会社Ltd.',
-    employee_name: '鈴木太郎',
-    status: 'draft',
-    created_at: '2024-01-20',
-    last_contact: '2024-01-20',
-  },
-  {
-    id: '4',
-    company_name: '株式会社デモ',
-    employee_name: '高橋美咲',
-    status: 'submitted',
-    created_at: '2024-01-22',
-    last_contact: '2024-01-23',
-  },
-];
+import { useCases, useCreateCase, useUpdateCase, useDeleteCase } from "@/hooks/useCases";
+import { CaseInsert, CaseUpdate } from "@/lib/database.types";
+import { format } from "date-fns";
 
 export default function AdminCases() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newCase, setNewCase] = useState({
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedCase, setSelectedCase] = useState<any>(null);
+  const [newCase, setNewCase] = useState<Partial<CaseInsert>>({
     company_name: "",
     employee_name: "",
+    reason: "",
+    status: "draft"
   });
+
+  const { data: cases, isLoading } = useCases();
+  const createCaseMutation = useCreateCase();
+  const updateCaseMutation = useUpdateCase();
+  const deleteCaseMutation = useDeleteCase();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -75,6 +52,12 @@ export default function AdminCases() {
         return <Badge className="bg-blue-100 text-blue-800 rounded-lg">進行中</Badge>;
       case 'submitted':
         return <Badge className="bg-purple-100 text-purple-800 rounded-lg">提出済み</Badge>;
+      case 'hearing':
+        return <Badge className="bg-orange-100 text-orange-800 rounded-lg">ヒアリング中</Badge>;
+      case 'negotiating':
+        return <Badge className="bg-yellow-100 text-yellow-800 rounded-lg">交渉中</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-red-100 text-red-800 rounded-lg">キャンセル</Badge>;
       case 'draft':
         return <Badge className="bg-gray-100 text-gray-800 rounded-lg">下書き</Badge>;
       default:
@@ -82,19 +65,69 @@ export default function AdminCases() {
     }
   };
 
-  const filteredCases = mockCases.filter(case_ => {
+  const filteredCases = cases?.filter(case_ => {
     const matchesSearch = case_.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         case_.employee_name.toLowerCase().includes(searchTerm.toLowerCase());
+                         (case_.employee_name?.toLowerCase() || "").includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || case_.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }) || [];
 
-  const handleCreateCase = () => {
-    // In real app, create case in Supabase
-    console.log("Creating case:", newCase);
-    setIsCreateModalOpen(false);
-    setNewCase({ company_name: "", employee_name: "" });
+  const handleCreateCase = async () => {
+    if (!newCase.company_name || !newCase.user_id) {
+      console.error("Company name and user_id are required");
+      return;
+    }
+
+    try {
+      await createCaseMutation.mutateAsync(newCase as CaseInsert);
+      setIsCreateModalOpen(false);
+      setNewCase({
+        company_name: "",
+        employee_name: "",
+        reason: "",
+        status: "draft"
+      });
+    } catch (error) {
+      console.error("Failed to create case:", error);
+    }
   };
+
+  const handleStatusUpdate = async (caseId: string, newStatus: string) => {
+    try {
+      await updateCaseMutation.mutateAsync({
+        id: caseId,
+        updates: { status: newStatus }
+      });
+    } catch (error) {
+      console.error("Failed to update case status:", error);
+    }
+  };
+
+  const handleDeleteCase = async (caseId: string) => {
+    if (window.confirm("本当にこの案件を削除しますか？")) {
+      try {
+        await deleteCaseMutation.mutateAsync(caseId);
+      } catch (error) {
+        console.error("Failed to delete case:", error);
+      }
+    }
+  };
+
+  const openDetailModal = (case_: any) => {
+    setSelectedCase(case_);
+    setIsDetailModalOpen(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-admin-background font-body">
+        <AdminNavigation />
+        <div className="max-w-7xl mx-auto p-6 flex items-center justify-center">
+          <div className="text-admin-text">データを読み込み中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-admin-background font-body">
@@ -128,7 +161,7 @@ export default function AdminCases() {
                   <Input
                     id="company"
                     placeholder="株式会社○○"
-                    value={newCase.company_name}
+                    value={newCase.company_name || ""}
                     onChange={(e) => setNewCase({...newCase, company_name: e.target.value})}
                     className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
                   />
@@ -138,16 +171,37 @@ export default function AdminCases() {
                   <Input
                     id="employee"
                     placeholder="山田太郎"
-                    value={newCase.employee_name}
+                    value={newCase.employee_name || ""}
                     onChange={(e) => setNewCase({...newCase, employee_name: e.target.value})}
                     className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="reason" className="text-admin-text">退職理由</Label>
+                  <Input
+                    id="reason"
+                    placeholder="理由を入力..."
+                    value={newCase.reason || ""}
+                    onChange={(e) => setNewCase({...newCase, reason: e.target.value})}
+                    className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="user_id" className="text-admin-text">ユーザーID</Label>
+                  <Input
+                    id="user_id"
+                    placeholder="ユーザーIDを入力"
+                    value={newCase.user_id || ""}
+                    onChange={(e) => setNewCase({...newCase, user_id: e.target.value})}
+                    className="bg-white border-neutral-300 text-admin-text focus:border-admin-primary focus:ring-admin-primary rounded-lg"
+                  />
+                </div>
                 <Button 
-                  onClick={handleCreateCase} 
+                  onClick={handleCreateCase}
+                  disabled={createCaseMutation.isPending}
                   className="w-full bg-admin-primary hover:bg-admin-primary/90 text-white rounded-lg"
                 >
-                  案件を作成
+                  {createCaseMutation.isPending ? "作成中..." : "案件を作成"}
                 </Button>
               </div>
             </DialogContent>
@@ -182,8 +236,11 @@ export default function AdminCases() {
                     <SelectItem value="all">すべてのステータス</SelectItem>
                     <SelectItem value="draft">下書き</SelectItem>
                     <SelectItem value="submitted">提出済み</SelectItem>
+                    <SelectItem value="hearing">ヒアリング中</SelectItem>
+                    <SelectItem value="negotiating">交渉中</SelectItem>
                     <SelectItem value="in_progress">進行中</SelectItem>
                     <SelectItem value="completed">完了</SelectItem>
+                    <SelectItem value="cancelled">キャンセル</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -207,7 +264,7 @@ export default function AdminCases() {
                   <TableHead className="text-admin-text font-medium">従業員名</TableHead>
                   <TableHead className="text-admin-text font-medium">ステータス</TableHead>
                   <TableHead className="text-admin-text font-medium">作成日</TableHead>
-                  <TableHead className="text-admin-text font-medium">最終連絡</TableHead>
+                  <TableHead className="text-admin-text font-medium">更新日</TableHead>
                   <TableHead className="text-admin-text font-medium">アクション</TableHead>
                 </TableRow>
               </TableHeader>
@@ -223,30 +280,60 @@ export default function AdminCases() {
                     <TableCell className="text-admin-text">
                       <div className="flex items-center space-x-2">
                         <User className="h-4 w-4 text-admin-text-secondary" />
-                        <span>{case_.employee_name}</span>
+                        <span>{case_.employee_name || "未設定"}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(case_.status)}
+                      <Select
+                        value={case_.status || "draft"}
+                        onValueChange={(value) => handleStatusUpdate(case_.id, value)}
+                        disabled={updateCaseMutation.isPending}
+                      >
+                        <SelectTrigger className="w-32 h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">下書き</SelectItem>
+                          <SelectItem value="submitted">提出済み</SelectItem>
+                          <SelectItem value="hearing">ヒアリング中</SelectItem>
+                          <SelectItem value="negotiating">交渉中</SelectItem>
+                          <SelectItem value="in_progress">進行中</SelectItem>
+                          <SelectItem value="completed">完了</SelectItem>
+                          <SelectItem value="cancelled">キャンセル</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="text-admin-text">
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4 text-admin-text-secondary" />
-                        <span>{case_.created_at}</span>
+                        <span>{case_.created_at ? format(new Date(case_.created_at), 'yyyy/MM/dd') : "-"}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-admin-text">{case_.last_contact}</TableCell>
+                    <TableCell className="text-admin-text">
+                      {case_.updated_at ? format(new Date(case_.updated_at), 'yyyy/MM/dd') : "-"}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openDetailModal(case_)}
+                          className="border-admin-primary text-admin-primary hover:bg-admin-primary/10 rounded-lg"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Link to={`/call/${case_.id}`}>
-                          <Button variant="outline" size="sm" className="border-admin-primary text-admin-primary hover:bg-admin-primary/10 rounded-lg">
+                          <Button variant="outline" size="sm" className="border-admin-secondary text-admin-secondary hover:bg-admin-secondary/10 rounded-lg">
                             <Phone className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Button variant="outline" size="sm" className="border-admin-secondary text-admin-secondary hover:bg-admin-secondary/10 rounded-lg">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-50 rounded-lg">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteCase(case_.id)}
+                          disabled={deleteCaseMutation.isPending}
+                          className="border-red-500 text-red-500 hover:bg-red-50 rounded-lg"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -257,6 +344,52 @@ export default function AdminCases() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Case Detail Modal */}
+        <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+          <DialogContent className="bg-white border-neutral-200 rounded-lg max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-admin-text">案件詳細</DialogTitle>
+              <DialogDescription className="text-admin-text-secondary">
+                案件の詳細情報を確認できます
+              </DialogDescription>
+            </DialogHeader>
+            {selectedCase && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-admin-text font-medium">会社名</Label>
+                    <p className="text-admin-text">{selectedCase.company_name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-admin-text font-medium">従業員名</Label>
+                    <p className="text-admin-text">{selectedCase.employee_name || "未設定"}</p>
+                  </div>
+                  <div>
+                    <Label className="text-admin-text font-medium">ステータス</Label>
+                    <div className="mt-1">
+                      {getStatusBadge(selectedCase.status)}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-admin-text font-medium">作成日</Label>
+                    <p className="text-admin-text">
+                      {selectedCase.created_at ? format(new Date(selectedCase.created_at), 'yyyy年MM月dd日') : "-"}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-admin-text font-medium">退職理由</Label>
+                  <p className="text-admin-text mt-1">{selectedCase.reason || "未設定"}</p>
+                </div>
+                <div>
+                  <Label className="text-admin-text font-medium">ユーザーID</Label>
+                  <p className="text-admin-text font-mono text-sm">{selectedCase.user_id}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

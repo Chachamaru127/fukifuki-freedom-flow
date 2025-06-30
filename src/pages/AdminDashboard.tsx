@@ -16,28 +16,61 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AdminNavigation } from "@/components/AdminNavigation";
-
-// Mock data - in real app, fetch from Supabase
-const monthlyData = [
-  { month: "1月", cases: 45, completed: 42, revenue: 1260000 },
-  { month: "2月", cases: 52, completed: 48, revenue: 1440000 },
-  { month: "3月", cases: 38, completed: 35, revenue: 1050000 },
-  { month: "4月", cases: 61, completed: 58, revenue: 1740000 },
-  { month: "5月", cases: 49, completed: 46, revenue: 1380000 },
-  { month: "6月", cases: 55, completed: 52, revenue: 1560000 },
-];
-
-const statusData = [
-  { name: "完了", value: 78, color: "#10B981" },
-  { name: "進行中", value: 15, color: "#6366F1" },
-  { name: "保留中", value: 7, color: "#F59E0B" },
-];
+import { useCaseStatistics } from "@/hooks/useStatistics";
+import { useCases } from "@/hooks/useCases";
+import { format, startOfMonth, eachMonthOfInterval, subMonths } from "date-fns";
 
 export default function AdminDashboard() {
-  const totalCases = 156;
-  const completedCases = 142;
-  const completionRate = Math.round((completedCases / totalCases) * 100);
-  const monthlyRevenue = 1560000;
+  const { data: statistics, isLoading: statisticsLoading } = useCaseStatistics();
+  const { data: cases, isLoading: casesLoading } = useCases();
+
+  // Calculate monthly data from actual cases
+  const monthlyData = (() => {
+    if (!cases) return [];
+    
+    const last6Months = eachMonthOfInterval({
+      start: subMonths(new Date(), 5),
+      end: new Date()
+    });
+
+    return last6Months.map(month => {
+      const monthStart = startOfMonth(month);
+      const monthCases = cases.filter(case_ => {
+        const caseDate = new Date(case_.created_at || '');
+        return format(caseDate, 'yyyy-MM') === format(monthStart, 'yyyy-MM');
+      });
+
+      const completedCases = monthCases.filter(case_ => case_.status === 'completed');
+
+      return {
+        month: format(month, 'M月'),
+        cases: monthCases.length,
+        completed: completedCases.length,
+        revenue: completedCases.length * 30000 // 仮の売上計算
+      };
+    });
+  })();
+
+  const statusData = statistics ? [
+    { name: "完了", value: statistics.statusCounts.completed || 0, color: "#10B981" },
+    { name: "進行中", value: statistics.statusCounts.in_progress || 0, color: "#6366F1" },
+    { name: "下書き", value: statistics.statusCounts.draft || 0, color: "#F59E0B" },
+    { name: "提出済み", value: statistics.statusCounts.submitted || 0, color: "#8B5CF6" },
+  ] : [];
+
+  const currentMonthRevenue = monthlyData[monthlyData.length - 1]?.revenue || 0;
+  const avgResponseTime = cases ? (cases.length > 0 ? 2.3 : 0) : 0; // 仮の計算
+
+  if (statisticsLoading || casesLoading) {
+    return (
+      <div className="min-h-screen bg-admin-background font-body">
+        <AdminNavigation />
+        <div className="max-w-7xl mx-auto p-6 flex items-center justify-center">
+          <div className="text-admin-text">データを読み込み中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-admin-background font-body">
@@ -58,9 +91,9 @@ export default function AdminDashboard() {
               <Users className="h-4 w-4 text-admin-secondary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-admin-text">{totalCases}</div>
+              <div className="text-2xl font-bold text-admin-text">{statistics?.total || 0}</div>
               <p className="text-xs text-admin-text-secondary">
-                <span className="text-green-600">+12%</span> 前月比
+                今月: {statistics?.thisMonth || 0}件
               </p>
             </CardContent>
           </Card>
@@ -71,8 +104,8 @@ export default function AdminDashboard() {
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-admin-text">{completionRate}%</div>
-              <Progress value={completionRate} className="mt-2" />
+              <div className="text-2xl font-bold text-admin-text">{Math.round(statistics?.completionRate || 0)}%</div>
+              <Progress value={statistics?.completionRate || 0} className="mt-2" />
             </CardContent>
           </Card>
 
@@ -82,9 +115,9 @@ export default function AdminDashboard() {
               <DollarSign className="h-4 w-4 text-admin-accent" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-admin-text">¥{monthlyRevenue.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-admin-text">¥{currentMonthRevenue.toLocaleString()}</div>
               <p className="text-xs text-admin-text-secondary">
-                <span className="text-green-600">+8%</span> 前月比
+                完了案件ベース
               </p>
             </CardContent>
           </Card>
@@ -95,9 +128,9 @@ export default function AdminDashboard() {
               <Clock className="h-4 w-4 text-admin-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-admin-text">2.3日</div>
+              <div className="text-2xl font-bold text-admin-text">{avgResponseTime}日</div>
               <p className="text-xs text-admin-text-secondary">
-                <span className="text-red-600">+0.2日</span> 前月比
+                目標: 2日以内
               </p>
             </CardContent>
           </Card>
@@ -143,7 +176,7 @@ export default function AdminDashboard() {
                     cy="50%"
                     outerRadius={100}
                     dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}%`}
+                    label={({ name, value }) => value > 0 ? `${name}: ${value}件` : ''}
                   >
                     {statusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -166,11 +199,11 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-admin-text-secondary mb-4">
-                対応が必要な緊急案件が3件あります
+                対応が必要な案件を確認してください
               </p>
               <Link to="/admin/cases?filter=urgent">
                 <Button className="w-full bg-red-600 hover:bg-red-700 text-white rounded-lg">
-                  緊急案件を確認
+                  案件一覧を確認
                 </Button>
               </Link>
             </CardContent>
@@ -180,16 +213,18 @@ export default function AdminDashboard() {
             <CardHeader>
               <CardTitle className="text-admin-text flex items-center">
                 <Phone className="mr-2 h-4 w-4 text-admin-primary" />
-                本日の通話予約
+                進行中案件
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-admin-text-secondary mb-4">
-                本日予定されている通話が5件あります
+                進行中の案件: {statistics?.statusCounts.in_progress || 0}件
               </p>
-              <Button className="w-full bg-admin-primary hover:bg-admin-primary/90 text-white rounded-lg">
-                通話予約を確認
-              </Button>
+              <Link to="/admin/cases?filter=in_progress">
+                <Button className="w-full bg-admin-primary hover:bg-admin-primary/90 text-white rounded-lg">
+                  進行中案件を確認
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
