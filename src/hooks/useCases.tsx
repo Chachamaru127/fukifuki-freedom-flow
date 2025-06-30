@@ -1,11 +1,9 @@
 
-import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { casesService } from '@/lib/database-utils';
 import { Case, CaseInsert, CaseUpdate } from '@/lib/database.types';
 import { toast } from 'sonner';
 
-// Hook for fetching all cases
 export function useCases() {
   return useQuery({
     queryKey: ['cases'],
@@ -19,7 +17,6 @@ export function useCases() {
   });
 }
 
-// Hook for fetching a single case
 export function useCase(id: string) {
   return useQuery({
     queryKey: ['cases', id],
@@ -34,7 +31,6 @@ export function useCase(id: string) {
   });
 }
 
-// Hook for creating a case
 export function useCreateCase() {
   const queryClient = useQueryClient();
 
@@ -56,7 +52,6 @@ export function useCreateCase() {
   });
 }
 
-// Hook for updating a case
 export function useUpdateCase() {
   const queryClient = useQueryClient();
 
@@ -79,7 +74,6 @@ export function useUpdateCase() {
   });
 }
 
-// Hook for deleting a case
 export function useDeleteCase() {
   const queryClient = useQueryClient();
 
