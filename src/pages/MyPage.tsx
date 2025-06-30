@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,52 +14,14 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserNavigation } from "@/components/UserNavigation";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-
-interface Case {
-  id: string;
-  company_name: string;
-  employee_name: string | null;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
+import { useCases } from "@/hooks/useCases";
 
 export default function MyPage() {
-  const [cases, setCases] = useState<Case[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user) {
-      fetchCases();
-    }
-  }, [user]);
-
-  const fetchCases = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('cases')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching cases:', error);
-        toast.error("案件データの取得に失敗しました");
-      } else {
-        setCases(data || []);
-      }
-    } catch (err) {
-      console.error('Fetch cases error:', err);
-      toast.error("案件データの取得中にエラーが発生しました");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: cases = [], isLoading, error } = useCases();
 
   const handleLogout = async () => {
     await signOut();
@@ -111,10 +73,14 @@ export default function MyPage() {
     }
   };
 
+  if (error) {
+    toast.error("案件データの取得に失敗しました");
+  }
+
   const completedCases = cases.filter(c => c.status === 'completed').length;
   const activeCases = cases.filter(c => c.status !== 'completed' && c.status !== 'draft').length;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-user-background-alt font-body">
         <UserNavigation />
@@ -231,10 +197,10 @@ export default function MyPage() {
                         <div className="flex items-center space-x-2">
                           <Building2 className="h-4 w-4 text-user-text-secondary" />
                           <h3 className="font-medium text-user-text">{caseItem.company_name}</h3>
-                          {getStatusBadge(caseItem.status)}
+                          {getStatusBadge(caseItem.status || 'draft')}
                         </div>
                         <p className="text-sm text-user-text-secondary">
-                          {getStatusText(caseItem.status)}
+                          {getStatusText(caseItem.status || 'draft')}
                         </p>
                         {caseItem.employee_name && (
                           <p className="text-sm text-user-text-secondary">
@@ -252,19 +218,19 @@ export default function MyPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-user-text-secondary">進捗</span>
-                        <span className="text-user-text">{getProgressValue(caseItem.status)}%</span>
+                        <span className="text-user-text">{getProgressValue(caseItem.status || 'draft')}%</span>
                       </div>
-                      <Progress value={getProgressValue(caseItem.status)} className="h-2" />
+                      <Progress value={getProgressValue(caseItem.status || 'draft')} className="h-2" />
                     </div>
                     
                     <div className="flex justify-between text-sm text-user-text-secondary mt-3 pt-3 border-t">
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-3 w-3" />
-                        <span>作成: {new Date(caseItem.created_at).toLocaleDateString('ja-JP')}</span>
+                        <span>作成: {new Date(caseItem.created_at || '').toLocaleDateString('ja-JP')}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-3 w-3" />
-                        <span>更新: {new Date(caseItem.updated_at).toLocaleDateString('ja-JP')}</span>
+                        <span>更新: {new Date(caseItem.updated_at || '').toLocaleDateString('ja-JP')}</span>
                       </div>
                     </div>
                   </div>

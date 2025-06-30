@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { UserNavigation } from "@/components/UserNavigation";
+import { useCreateCase } from "@/hooks/useCases";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ConsultationNew() {
   const [formData, setFormData] = useState({
@@ -29,6 +31,8 @@ export default function ConsultationNew() {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const createCase = useCreateCase();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,10 +42,26 @@ export default function ConsultationNew() {
       setError("必須項目を入力してください");
       return;
     }
+
+    if (!user) {
+      setError("ログインが必要です");
+      return;
+    }
     
-    // Simulate form submission - in real app, use Supabase
-    console.log("Creating consultation:", formData);
-    navigate("/mypage");
+    try {
+      await createCase.mutateAsync({
+        company_name: formData.companyName,
+        user_id: user.id,
+        reason: formData.reason || null,
+        employee_name: null,
+        status: 'draft'
+      });
+      
+      navigate("/mypage");
+    } catch (err) {
+      console.error('Case creation error:', err);
+      setError("案件の作成に失敗しました");
+    }
   };
 
   return (
@@ -237,8 +257,9 @@ export default function ConsultationNew() {
                 <Button 
                   type="submit" 
                   className="flex-1 bg-user-primary hover:bg-user-primary/90 text-white rounded-lg"
+                  disabled={createCase.isPending}
                 >
-                  相談を申し込む
+                  {createCase.isPending ? "作成中..." : "相談を申し込む"}
                 </Button>
                 <Button 
                   type="button" 
