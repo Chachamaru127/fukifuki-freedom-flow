@@ -1,84 +1,38 @@
 
-# 退職代行フキフキ (FUKIFUKI)
+# FUKIFUKI - 退職代行サービス
 
 確実・迅速・安心の退職代行サービス
 
 ## 🚀 プロジェクト概要
 
-FUKIFUKIは、労働問題のプロが提供する退職代行サービスのWebアプリケーションです。ユーザーフレンドリーなインターフェースと確実な退職手続きサポートを提供します。
+FUKIFUKIは、労働問題のプロフェッショナルが提供する退職代行サービスのWebアプリケーションです。ユーザーフレンドリーなインターフェースと確実な退職手続きサポートを提供します。
 
-## ✨ 主な機能
+## ⚡ セットアップ手順
 
-- 🎯 **プロフェッショナルなランディングページ** - Lottie/SVGアニメーション付き
-- 🔐 **完全な認証システム** - Email/Password認証 (Supabase)
-- 📊 **ダッシュボード** - KPI表示・進捗管理
-- 📋 **案件管理システム** - CRUD機能付き
-- 📞 **リアルタイム通話機能** - LiveKit統合
-- 🌙 **ダークモード対応** - システム連動
-- 📱 **レスポンシブデザイン** - モバイルファースト
-
-## 🛠 技術スタック
-
-- **フロントエンド**: React 18 + TypeScript
-- **スタイリング**: Tailwind CSS + shadcn/ui
-- **状態管理**: TanStack Query
-- **ルーティング**: React Router v6
-- **バックエンド**: Supabase
-- **リアルタイム通話**: LiveKit
-- **ビルドツール**: Vite
-- **デプロイ**: Vercel
-
-## 🎨 デザインシステム
-
-### カラーパレット
-- **Primary**: #0066CC (信頼感のあるブルー)
-- **Accent**: #FFB703 (活気のあるオレンジ)
-- **Neutral**: #F4F6F8 (クリーンなグレー)
-
-### フォント
-- **見出し**: M PLUS 1p
-- **本文**: Noto Sans JP
-
-## 🚦 セットアップ & 起動
-
-### 必要な環境
-- Node.js 18+
-- npm または yarn
-
-### インストール
+### 1. リポジトリのクローン
 ```bash
-# リポジトリをクローン
-git clone <YOUR_GIT_URL>
+git clone <YOUR_REPOSITORY_URL>
 cd fukifuki
+```
 
-# 依存関係をインストール
+### 2. 依存関係のインストール
+```bash
 npm install
 ```
 
-### 環境変数設定
-`.env.local` ファイルを作成し、以下を設定：
-
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-### 開発サーバー起動
-```bash
-npm run dev
-```
-
-### Supabase設定
-
-#### データベーステーブル
+### 3. Supabaseプロジェクトの設定
+1. [Supabase](https://supabase.com) でプロジェクトを作成
+2. SQL Editorで以下のテーブルを作成:
 
 ```sql
 -- プロフィールテーブル
 CREATE TABLE profiles (
   id UUID REFERENCES auth.users PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT,
   phone TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  role TEXT DEFAULT 'user',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 案件テーブル
@@ -86,8 +40,9 @@ CREATE TABLE cases (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users NOT NULL,
   company_name TEXT NOT NULL,
-  status TEXT CHECK (status IN ('draft', 'submitted', 'in_progress', 'completed')) DEFAULT 'draft',
-  notes TEXT,
+  status TEXT CHECK (status IN ('draft', 'submitted', 'hearing', 'negotiating', 'completed')) DEFAULT 'draft',
+  reason TEXT,
+  employee_name TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -102,24 +57,60 @@ CREATE TABLE call_results (
 );
 ```
 
-#### RLSポリシー設定
-
-```sql
--- プロフィール
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
-
--- 案件
-ALTER TABLE cases ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can manage own cases" ON cases FOR ALL USING (auth.uid() = user_id);
-
--- 通話記録
-ALTER TABLE call_results ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can manage own call results" ON call_results FOR ALL USING (
-  EXISTS (SELECT 1 FROM cases WHERE cases.id = call_results.case_id AND cases.user_id = auth.uid())
-);
+### 4. 環境変数の設定
+1. `.env.example`を`.env`にコピー
+2. Supabaseの設定値を入力:
+```bash
+cp .env.example .env
 ```
+
+### 5. 開発サーバーの起動
+```bash
+npm run dev
+```
+
+## ✨ 機能一覧
+
+### ユーザー機能
+- 🔐 **認証システム** - メール/パスワード認証
+- 📝 **案件作成** - 退職相談フォーム
+- 📊 **案件管理** - 自分の案件一覧・進捗確認
+- 📈 **進捗追跡** - リアルタイム状況更新
+
+### 管理者機能
+- 📊 **ダッシュボード** - KPI表示・統計情報
+- 📋 **案件管理** - 全案件の監視・ステータス更新
+- 🔍 **検索・フィルター** - 効率的な案件管理
+- 📈 **レポート** - 月次推移・成果分析
+
+## 🛠 技術スタック
+
+### フロントエンド
+- **React 18** + **TypeScript** - モダンなUI開発
+- **Vite** - 高速ビルドツール
+- **Tailwind CSS** - ユーティリティファーストCSS
+- **shadcn/ui** - 高品質UIコンポーネント
+- **React Router v6** - SPA ルーティング
+- **TanStack Query** - データフェッチング・状態管理
+
+### バックエンド
+- **Supabase** - PostgreSQL + 認証 + リアルタイム
+- **Row Level Security (RLS)** - セキュアなデータアクセス
+
+### 将来の実装
+- **LiveKit** - リアルタイム通話機能
+- **FastAPI + MIDORI** - AI音声アシスタント
+
+## 🎨 デザインシステム
+
+### カラーパレット
+- **Primary**: #0066CC (信頼感のあるブルー)
+- **Accent**: #FFB703 (活気のあるオレンジ)
+- **Secondary**: #10B981 (成功を表すグリーン)
+
+### フォント
+- **見出し**: M PLUS 1p
+- **本文**: Noto Sans JP
 
 ## 📁 プロジェクト構造
 
@@ -127,34 +118,39 @@ CREATE POLICY "Users can manage own call results" ON call_results FOR ALL USING 
 src/
 ├── components/          # 再利用可能コンポーネント
 │   ├── ui/             # shadcn/ui コンポーネント
-│   ├── AppSidebar.tsx  # アプリケーションサイドバー
-│   └── ThemeToggle.tsx # ダークモード切替
+│   ├── UserNavigation.tsx
+│   └── AdminNavigation.tsx
 ├── hooks/              # カスタムフック
-│   ├── useTheme.tsx    # テーマ管理
-│   └── use-toast.ts    # トースト通知
+│   ├── useAuth.tsx     # 認証管理
+│   ├── useCases.tsx    # 案件管理
+│   └── useStatistics.tsx
 ├── pages/              # ページコンポーネント
 │   ├── Index.tsx       # ランディングページ
 │   ├── Login.tsx       # 認証ページ
-│   ├── Dashboard.tsx   # ダッシュボード
-│   ├── Cases.tsx       # 案件管理
-│   └── Call.tsx        # 通話ページ
+│   ├── MyPage.tsx      # ユーザーダッシュボード
+│   ├── ConsultationNew.tsx # 新規相談
+│   ├── AdminDashboard.tsx  # 管理者ダッシュボード
+│   └── AdminCases.tsx      # 管理者案件管理
 ├── lib/                # ユーティリティ
-│   └── utils.ts        # 共通関数
-└── App.tsx             # メインアプリケーション
+│   ├── utils.ts        # 共通関数
+│   └── database-utils.ts # DB操作ヘルパー
+└── integrations/       # 外部サービス連携
+    └── supabase/       # Supabase設定
 ```
 
-## 🔧 主要機能の実装状況
+## 🔧 実装済み機能
 
 - ✅ レスポンシブランディングページ
-- ✅ ダークモード対応
-- ✅ 認証システム (モック実装)
-- ✅ ダッシュボード (KPI表示)
-- ✅ 案件管理 (CRUD)
-- ✅ 通話ページ (UI実装)
-- ⏳ Supabase統合 (要設定)
-- ⏳ LiveKit統合 (要設定)
+- ✅ 認証システム (Supabase Auth)
+- ✅ ユーザーダッシュボード (案件管理)
+- ✅ 管理者ダッシュボード (統計・KPI)
+- ✅ 案件CRUD操作
+- ✅ リアルタイムデータ更新
+- ✅ ステータス管理（5段階）
+- ✅ 検索・フィルター機能
+- ⏳ 通話機能 (UI実装済み、LiveKit統合待ち)
 
-## 🚀 本番デプロイ
+## 🚀 デプロイ
 
 ### Vercel へのデプロイ
 ```bash
